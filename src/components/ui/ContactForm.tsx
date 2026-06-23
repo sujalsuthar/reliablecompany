@@ -94,6 +94,15 @@ export default function ContactForm() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
+    const honeypot = (
+      event.currentTarget.elements.namedItem('website') as HTMLInputElement | null
+    )?.value
+    if (honeypot?.trim()) {
+      setIsSuccess(true)
+      setFormData(initialFormData)
+      return
+    }
+
     const validationErrors = validateForm(formData)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
@@ -158,6 +167,18 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+        <label htmlFor="website">Website</label>
+        <input
+          id="website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          defaultValue=""
+        />
+      </div>
+
       <div>
         <label htmlFor="fullName" className="mb-2 block text-sm font-semibold text-gray-900">
           {t.fullName}

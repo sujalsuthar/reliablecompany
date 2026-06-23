@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAdminSession } from '@/lib/cms/api-auth'
 import { isBlobEnabled } from '@/lib/cms/storage'
+import { validateImageUpload } from '@/lib/security/upload'
 
 export async function POST(request: NextRequest) {
   const authError = await requireAdminSession()
@@ -21,13 +22,20 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-')
-    const filename = `${Date.now()}-${safeName}`
+    const validation = validateImageUpload(file, buffer)
+
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 })
+    }
+
+    const ext = validation.mime.split('/')[1]?.replace('jpeg', 'jpg') ?? 'bin'
+    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 80)
+    const filename = `${Date.now()}-${safeName}.${ext}`
 
     if (isBlobEnabled()) {
       const blob = await put(`uploads/${filename}`, buffer, {
         access: 'public',
-        contentType: file.type || 'application/octet-stream',
+        contentType: validation.mime,
       })
       return NextResponse.json({ url: blob.url })
     }

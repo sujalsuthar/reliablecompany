@@ -123,12 +123,21 @@ CMS uses `data/cms-store.json` and `public/uploads/` on disk — **no KV or Blob
 |----------|----------|-------------|
 | `ADMIN_USERNAME` | Yes | Admin login username (default: `admin`) |
 | `ADMIN_PASSWORD` | Yes | Admin login password |
-| `ADMIN_SESSION_SECRET` | Recommended | Secret for signing session cookies (falls back to password in dev) |
+| `ADMIN_SESSION_SECRET` | **Required in production** | Secret for signing session cookies (min. 32 characters) |
 | `SITE_URL` | Production | Public URL, e.g. `https://engineering.reliablecompany.sa` (SEO & sitemap) |
 | `NODE_ENV` | Production | Set to `production` on cPanel/VPS |
 | `KV_REST_API_*` / `BLOB_*` | Vercel only | Leave empty on cPanel — CMS uses local files |
 
 Never commit `.env.local` or secrets to git.
+
+## Security (production)
+
+- Set `ADMIN_PASSWORD` and `ADMIN_SESSION_SECRET` (32+ characters) before going live
+- Admin session cookies are `httpOnly`, `secure`, and `SameSite=Strict` in production
+- Login and contact forms are rate-limited; contact form includes a honeypot
+- CMS image uploads: images only, max 5 MB, magic-byte validation
+- Security headers: HSTS, CSP, `X-Frame-Options`, `Permissions-Policy`, and more (`next.config.mjs`)
+- `/api/cms/*` and `/api/admin/*` require a valid admin session (middleware + route checks)
 
 ## Project structure
 

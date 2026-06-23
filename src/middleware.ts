@@ -12,23 +12,34 @@ import {
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 function setLocaleCookies(response: NextResponse, locale: string, manual: boolean) {
-  response.cookies.set(LOCALE_COOKIE, locale, {
+  const isProduction = process.env.NODE_ENV === 'production'
+  const base = {
     path: '/',
     maxAge: COOKIE_MAX_AGE,
-    sameSite: 'lax',
-  })
+    sameSite: 'lax' as const,
+    secure: isProduction,
+  }
+
+  response.cookies.set(LOCALE_COOKIE, locale, base)
   if (manual) {
-    response.cookies.set(LOCALE_MANUAL_COOKIE, '1', {
-      path: '/',
-      maxAge: COOKIE_MAX_AGE,
-      sameSite: 'lax',
-    })
+    response.cookies.set(LOCALE_MANUAL_COOKIE, '1', base)
   }
 }
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get(COOKIE_NAME)?.value
+
+  // --- Protect admin API routes (defense in depth) ---
+  const isAdminLoginApi =
+    pathname === '/api/admin/login' && request.method === 'POST'
+  const isProtectedApi =
+    pathname.startsWith('/api/cms') ||
+    (pathname.startsWith('/api/admin') && !isAdminLoginApi)
+
+  if (isProtectedApi && !(await verifySessionToken(token))) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
   // --- Admin auth ---
   if (pathname === '/admin/login') {

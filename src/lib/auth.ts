@@ -1,14 +1,36 @@
 const COOKIE_NAME = 'admin_session'
 const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000
+const MIN_SESSION_SECRET_LENGTH = 32
 
 export { COOKIE_NAME, SESSION_MAX_AGE_MS }
 
+function isProduction(): boolean {
+  return process.env.NODE_ENV === 'production'
+}
+
 function getSessionSecret(): string {
-  return (
-    process.env.ADMIN_SESSION_SECRET ||
-    process.env.ADMIN_PASSWORD ||
-    'dev-session-secret-change-me'
-  )
+  const secret = process.env.ADMIN_SESSION_SECRET
+
+  if (isProduction()) {
+    if (!secret || secret.length < MIN_SESSION_SECRET_LENGTH) {
+      console.error(
+        `[auth] ADMIN_SESSION_SECRET must be set to at least ${MIN_SESSION_SECRET_LENGTH} characters in production.`,
+      )
+      return '__INVALID_PRODUCTION_SESSION_SECRET__'
+    }
+    return secret
+  }
+
+  return secret || process.env.ADMIN_PASSWORD || 'dev-session-secret-change-me'
+}
+
+export function isAuthConfigured(): boolean {
+  if (!process.env.ADMIN_PASSWORD) return false
+  if (isProduction()) {
+    const secret = process.env.ADMIN_SESSION_SECRET
+    return Boolean(secret && secret.length >= MIN_SESSION_SECRET_LENGTH)
+  }
+  return true
 }
 
 export function getAdminCredentials() {

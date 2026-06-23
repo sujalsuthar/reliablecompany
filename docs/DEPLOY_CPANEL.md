@@ -79,7 +79,7 @@ cPanel → **Setup Node.js App** → **CREATE APPLICATION**
 | `SITE_URL` | `https://engineering.reliablecompany.sa` |
 | `ADMIN_USERNAME` | `admin` (or your choice) |
 | `ADMIN_PASSWORD` | strong password |
-| `ADMIN_SESSION_SECRET` | long random string |
+| `ADMIN_SESSION_SECRET` | long random string (**min. 32 characters**) |
 
 **Do not set** `KV_*` or `BLOB_*` on cPanel unless you want cloud storage.
 

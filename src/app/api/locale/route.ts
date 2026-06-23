@@ -7,13 +7,9 @@ import {
   LOCALE_MANUAL_COOKIE,
   type Locale,
 } from '@/lib/i18n/config'
+import { publicCookieOptions } from '@/lib/security/cookies'
 
-const COOKIE_OPTS = {
-  path: '/',
-  maxAge: 60 * 60 * 24 * 365,
-  sameSite: 'lax' as const,
-  secure: process.env.NODE_ENV === 'production',
-}
+const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 export async function POST(request: Request) {
   let locale: Locale = DEFAULT_LOCALE
@@ -30,10 +26,10 @@ export async function POST(request: Request) {
   }
 
   const response = NextResponse.json({ ok: true, locale, manual })
-  response.cookies.set(LOCALE_COOKIE, locale, COOKIE_OPTS)
+  response.cookies.set(LOCALE_COOKIE, locale, publicCookieOptions(COOKIE_MAX_AGE))
 
   if (manual) {
-    response.cookies.set(LOCALE_MANUAL_COOKIE, '1', COOKIE_OPTS)
+    response.cookies.set(LOCALE_MANUAL_COOKIE, '1', publicCookieOptions(COOKIE_MAX_AGE))
   } else {
     response.cookies.delete(LOCALE_MANUAL_COOKIE)
   }
