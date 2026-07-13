@@ -1,0 +1,1 @@
+"use strict";exports.id=1483,exports.ids=[1483],exports.modules={41483:(e,t,r)=>{r.r(t),r.d(t,{default:()=>s});let s=(0,r(58885).createProxy)(String.raw`C:\reliable-src\src\components\layout\CampaignWidget.tsx#default`)}};

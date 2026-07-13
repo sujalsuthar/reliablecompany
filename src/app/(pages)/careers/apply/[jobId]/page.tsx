@@ -4,12 +4,13 @@ import { notFound } from 'next/navigation'
 import CareerApplyForm from '@/components/careers/CareerApplyForm'
 import { getActiveCareers, getCareerById } from '@/lib/content'
 import { generateLocalizedMetadata } from '@/lib/seo'
+import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
 interface CareerApplyPageProps {
   params: { jobId: string }
 }
 
-export const revalidate = 0
+export const revalidate = PUBLIC_REVALIDATE_SECONDS
 export const dynamicParams = true
 
 export async function generateStaticParams() {

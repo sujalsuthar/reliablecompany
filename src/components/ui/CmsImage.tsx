@@ -12,7 +12,20 @@ function useNativeImg(src: string): boolean {
   return src.startsWith('http://') || src.startsWith('https://')
 }
 
-export default function CmsImage({ src, alt, className, fill, sizes, priority }: CmsImageProps) {
+export default function CmsImage({
+  src,
+  alt,
+  className,
+  fill,
+  sizes,
+  priority,
+  quality = 75,
+  loading,
+  ...rest
+}: CmsImageProps) {
+  const resolvedLoading = priority ? undefined : loading ?? 'lazy'
+  const fetchPriority = priority ? 'high' : 'auto'
+
   if (useNativeImg(src)) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -21,6 +34,9 @@ export default function CmsImage({ src, alt, className, fill, sizes, priority }:
         alt={alt ?? ''}
         className={clsx(fill && 'absolute inset-0 h-full w-full object-cover', className)}
         sizes={sizes}
+        loading={resolvedLoading}
+        decoding="async"
+        fetchPriority={fetchPriority}
       />
     )
   }
@@ -31,8 +47,12 @@ export default function CmsImage({ src, alt, className, fill, sizes, priority }:
       alt={alt ?? ''}
       fill={fill}
       className={className}
-      sizes={sizes}
+      sizes={sizes ?? '(max-width: 768px) 100vw, 50vw'}
       priority={priority}
+      quality={quality}
+      loading={resolvedLoading}
+      decoding="async"
+      {...rest}
     />
   )
 }

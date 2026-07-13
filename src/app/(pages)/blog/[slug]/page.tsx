@@ -7,8 +7,9 @@ import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { formatDate, getMessages } from '@/lib/i18n/messages'
 import { generateLocalizedMetadata } from '@/lib/seo'
+import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
-export const revalidate = 0
+export const revalidate = PUBLIC_REVALIDATE_SECONDS
 export const dynamicParams = true
 
 interface BlogDetailPageProps {

@@ -47,6 +47,7 @@ export default async function Hero() {
           priority
           className="object-cover opacity-45"
           sizes="100vw"
+          quality={70}
         />
       )}
 

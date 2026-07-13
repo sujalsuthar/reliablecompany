@@ -34,7 +34,7 @@ export const LEGAL_VERSION = 1
 let memoryStore: CmsStore | null = null
 /** Short TTL cache so Masar/shared hosting does not hit Mongo on every request. */
 let memoryStoreCachedAt = 0
-const MEMORY_TTL_MS = 120_000
+const MEMORY_TTL_MS = 300_000
 
 function getCachedStore(): CmsStore | null {
   if (!memoryStore) return null

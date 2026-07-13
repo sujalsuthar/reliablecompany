@@ -1,4 +1,4 @@
-// File: C:\FOR JAINISH\reliablecompany\reliable-engineering - Copy\src\app\(pages)\careers\page.tsx
+// File: C:\reliable-src\src\app\(pages)\careers\page.tsx
 import * as entry from '../../../../../src/app/(pages)/careers/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

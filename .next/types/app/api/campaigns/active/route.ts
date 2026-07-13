@@ -1,4 +1,4 @@
-// File: C:\FOR JAINISH\reliablecompany\reliable-engineering - Copy\src\app\api\campaigns\active\route.ts
+// File: C:\reliable-src\src\app\api\campaigns\active\route.ts
 import * as entry from '../../../../../../src/app/api/campaigns/active/route.js'
 import type { NextRequest } from 'next/server.js'
 

@@ -30,10 +30,13 @@ export default function CampaignWidget() {
 
   useEffect(() => {
     let cancelled = false
+    let popupTimer: ReturnType<typeof setTimeout> | undefined
+    let idleHandle: number | undefined
+    let fallbackTimer: ReturnType<typeof setTimeout> | undefined
 
     async function load() {
       try {
-        const res = await fetch('/api/campaigns/active')
+        const res = await fetch('/api/campaigns/active', { cache: 'no-store' })
         if (!res.ok) return
         const data = (await res.json()) as { campaign: Campaign | null }
         if (cancelled || !data.campaign) return
@@ -49,7 +52,7 @@ export default function CampaignWidget() {
         }
 
         const delay = data.campaign.showDelayMs ?? 2500
-        window.setTimeout(() => {
+        popupTimer = setTimeout(() => {
           if (!cancelled) setMode('popup')
         }, delay)
       } catch {
@@ -57,9 +60,24 @@ export default function CampaignWidget() {
       }
     }
 
-    load()
+    // Defer campaign fetch so first paint wins on shared hosting
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleHandle = window.requestIdleCallback(() => {
+        void load()
+      }, { timeout: 2500 })
+    } else {
+      fallbackTimer = setTimeout(() => {
+        void load()
+      }, 1200)
+    }
+
     return () => {
       cancelled = true
+      if (popupTimer) clearTimeout(popupTimer)
+      if (fallbackTimer) clearTimeout(fallbackTimer)
+      if (idleHandle !== undefined && 'cancelIdleCallback' in window) {
+        window.cancelIdleCallback(idleHandle)
+      }
     }
   }, [])
 

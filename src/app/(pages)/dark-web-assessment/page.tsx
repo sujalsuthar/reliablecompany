@@ -6,8 +6,9 @@ import DarkWebAssessmentForm from '@/components/campaigns/DarkWebAssessmentForm'
 import { getActiveCampaign } from '@/lib/cms/store'
 import { getLocale } from '@/lib/i18n/locale'
 import { BASE_URL } from '@/lib/seo'
+import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
-export const revalidate = 0
+export const revalidate = PUBLIC_REVALIDATE_SECONDS
 
 const COPY = {
   en: {

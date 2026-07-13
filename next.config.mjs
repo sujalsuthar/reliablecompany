@@ -59,8 +59,16 @@ const securityHeaders = [
 const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // On Masar/cPanel, Next image optimizer competes with page rendering for RAM/CPU.
+  // Serve compressed source files directly unless running on Vercel (or opt-in).
   images: {
+    unoptimized:
+      process.env.NEXT_IMAGE_UNOPTIMIZED === '1' ||
+      (process.env.NEXT_IMAGE_UNOPTIMIZED !== '0' && !process.env.VERCEL),
     formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -138,6 +146,24 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: securityHeaders,
+      },
+      {
+        source: '/_next/static/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path(.*)\\.(ico|png|jpg|jpeg|webp|avif|svg|woff2)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+          },
+        ],
       },
     ]
   },

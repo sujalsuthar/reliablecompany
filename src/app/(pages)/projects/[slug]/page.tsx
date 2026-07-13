@@ -11,13 +11,14 @@ import { getLocale } from '@/lib/i18n/locale'
 import { getMessages } from '@/lib/i18n/messages'
 import { getImageUrl } from '@/lib/images'
 import { generateLocalizedMetadata } from '@/lib/seo'
+import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 import type { DivisionType } from '@/lib/types'
 
 interface ProjectDetailPageProps {
   params: { slug: string }
 }
 
-export const revalidate = 0
+export const revalidate = PUBLIC_REVALIDATE_SECONDS
 export const dynamicParams = true
 
 const divisionBadgeStyles: Record<DivisionType, string> = {

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { Cairo, Inter, Tajawal } from 'next/font/google'
 
 import CookieBanner from '@/components/layout/CookieBanner'
-import CampaignWidget from '@/components/layout/CampaignWidget'
 import WhatsAppButton from '@/components/ui/WhatsAppButton'
 import Footer from '@/components/layout/Footer'
 import Navbar from '@/components/layout/Navbar'
@@ -11,9 +11,15 @@ import { NavOverlayProvider } from '@/components/providers/NavOverlayProvider'
 import PageTransition from '@/components/ui/PageTransition'
 import { isRtl } from '@/lib/i18n/config'
 import { getLocale } from '@/lib/i18n/locale'
+import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 import { BASE_URL } from '@/lib/seo'
 
 import '@/styles/globals.css'
+
+const CampaignWidget = dynamic(
+  () => import('@/components/layout/CampaignWidget'),
+  { ssr: false, loading: () => null },
+)
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,7 +42,7 @@ const tajawal = Tajawal({
   variable: '--font-tajawal',
 })
 
-export const revalidate = 0
+export const revalidate = PUBLIC_REVALIDATE_SECONDS
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

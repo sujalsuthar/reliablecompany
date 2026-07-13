@@ -15,8 +15,9 @@ import { getMessages } from '@/lib/i18n/messages'
 import { getLucideIcon } from '@/lib/icons'
 import { PROFILE_IMAGES } from '@/lib/profile-content'
 import { generateCmsPageMetadata } from '@/lib/seo'
+import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
-export const revalidate = 0
+export const revalidate = PUBLIC_REVALIDATE_SECONDS
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateCmsPageMetadata('about')

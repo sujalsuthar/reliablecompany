@@ -10,8 +10,9 @@ import { getFooterContent, getGlobalContent } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { getMessages } from '@/lib/i18n/messages'
 import { generateCmsPageMetadata } from '@/lib/seo'
+import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
-export const revalidate = 0
+export const revalidate = PUBLIC_REVALIDATE_SECONDS
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateCmsPageMetadata('contact')
