@@ -11,9 +11,12 @@ export function adminSessionCookieOptions(maxAgeSec: number) {
 }
 
 export function publicCookieOptions(maxAgeSec: number) {
+  // Allow COOKIE_SECURE=0 on UAT if SSL is misconfigured (browser "Not secure")
+  // otherwise Secure cookies may be dropped and language switch appears broken.
+  const forceInsecure = process.env.COOKIE_SECURE === '0'
   return {
     httpOnly: false,
-    secure: isProduction,
+    secure: isProduction && !forceInsecure,
     sameSite: 'lax' as const,
     path: '/',
     maxAge: maxAgeSec,

@@ -37,7 +37,7 @@ export default function ServicesMegaMenu({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-4 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-700"
+              className="absolute end-4 top-4 z-20 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm transition-colors hover:bg-gray-50 hover:text-gray-700"
               aria-label="Close menu"
             >
               <X className="h-4 w-4" aria-hidden />

@@ -88,6 +88,33 @@ export default function NavbarClient({
     setIsOpen(false)
   }, [pathname])
 
+  // Desktop: close Services mega menu on Escape / outside click (prevents stuck overlay blocking UI)
+  useEffect(() => {
+    if (!servicesOpen) return
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setServicesOpen(false)
+    }
+
+    const onPointerDown = (event: MouseEvent | TouchEvent) => {
+      const target = event.target
+      if (!(target instanceof Element)) return
+      if (target.closest('[data-services-menu]') || target.closest('[data-services-trigger]')) {
+        return
+      }
+      setServicesOpen(false)
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('touchstart', onPointerDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('touchstart', onPointerDown)
+    }
+  }, [servicesOpen])
+
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
 
@@ -135,6 +162,7 @@ export default function NavbarClient({
               ))}
 
               <div
+                data-services-trigger
                 onMouseEnter={() => {
                   setResourcesOpen(false)
                   setServicesOpen(true)
@@ -200,10 +228,20 @@ export default function NavbarClient({
             </div>
           </div>
 
+          {servicesOpen ? (
+            <button
+              type="button"
+              aria-label="Close services menu"
+              className="fixed inset-0 z-40 hidden bg-black/20 lg:block"
+              onClick={() => setServicesOpen(false)}
+            />
+          ) : null}
+
           <div
+            data-services-menu
             className={clsx(
-              'absolute left-0 right-0 top-full z-50 hidden px-5 pt-3 sm:px-8 lg:block lg:px-10',
-              !servicesOpen && 'pointer-events-none',
+              'absolute left-0 right-0 top-full z-50 hidden px-5 pt-3 sm:px-8 lg:px-10',
+              servicesOpen ? 'lg:block' : 'lg:hidden',
             )}
             onMouseEnter={() => setServicesOpen(true)}
             onMouseLeave={() => setServicesOpen(false)}

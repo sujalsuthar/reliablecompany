@@ -13,11 +13,12 @@ const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
 function setLocaleCookies(response: NextResponse, locale: string, manual: boolean) {
   const isProduction = process.env.NODE_ENV === 'production'
+  const forceInsecure = process.env.COOKIE_SECURE === '0'
   const base = {
     path: '/',
     maxAge: COOKIE_MAX_AGE,
     sameSite: 'lax' as const,
-    secure: isProduction,
+    secure: isProduction && !forceInsecure,
   }
 
   response.cookies.set(LOCALE_COOKIE, locale, base)
