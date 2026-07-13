@@ -1,0 +1,8 @@
+User-Agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /api/cms/
+
+Host: https://reliablecompany.sa
+Sitemap: https://reliablecompany.sa/sitemap.xml

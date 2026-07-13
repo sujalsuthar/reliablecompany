@@ -4,8 +4,9 @@ node_modules
 .pnp.js
 .yarn/install-state.gz
 
-# next.js
-.next
+# next.js — commit production build for cPanel (Masar cannot npm run build)
+# Exclude only the webpack cache (large, not required at runtime)
+.next/cache
 out
 
 # production
