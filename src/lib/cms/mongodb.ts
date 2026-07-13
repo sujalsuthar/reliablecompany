@@ -24,14 +24,26 @@ async function connectMongoClient(): Promise<MongoClient> {
   }
 
   if (!globalForMongo.mongoClientPromise) {
-    const client = new MongoClient(uri)
+    const client = new MongoClient(uri, {
+      // Fail fast on shared hosting when Atlas IP is blocked / slow
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 15000,
+      maxPoolSize: 5,
+    })
     globalForMongo.mongoClientPromise = client.connect().then((connected) => {
       globalForMongo.mongoClient = connected
       return connected
     })
   }
 
-  return globalForMongo.mongoClientPromise
+  try {
+    return await globalForMongo.mongoClientPromise
+  } catch (error) {
+    globalForMongo.mongoClientPromise = null
+    globalForMongo.mongoClient = null
+    throw error
+  }
 }
 
 export async function getDb(): Promise<Db> {

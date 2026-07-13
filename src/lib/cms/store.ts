@@ -24,7 +24,7 @@ import {
 import { mergePageSeo } from '@/lib/cms/page-seo'
 import { COMPANY_ADDRESS, COMPANY_FACEBOOK_URL, COMPANY_PHONE, LOGO_PATH } from '@/lib/brand'
 import { DEFAULT_MEGA_MENU_IMAGE, DEFAULT_PAGE_HERO_IMAGES } from '@/lib/page-heroes'
-import { readRawStore, writeRawStore, isMongoEnabled } from '@/lib/cms/storage'
+import { readRawStore, writeRawStore } from '@/lib/cms/storage'
 import { buildSeedServices } from '@/lib/service-catalog'
 import type { Division, Hero, SiteSettings, TeamMember, WhyStat } from '@/lib/types'
 
@@ -32,6 +32,25 @@ export const PROFILE_VERSION = 14
 export const LEGAL_VERSION = 1
 
 let memoryStore: CmsStore | null = null
+/** Short TTL cache so Masar/shared hosting does not hit Mongo on every request. */
+let memoryStoreCachedAt = 0
+const MEMORY_TTL_MS = 30_000
+
+function getCachedStore(): CmsStore | null {
+  if (!memoryStore) return null
+  if (Date.now() - memoryStoreCachedAt > MEMORY_TTL_MS) return null
+  return memoryStore
+}
+
+function setCachedStore(store: CmsStore) {
+  memoryStore = store
+  memoryStoreCachedAt = Date.now()
+}
+
+function clearCachedStore() {
+  memoryStore = null
+  memoryStoreCachedAt = 0
+}
 
 function migrateStore(store: CmsStore): CmsStore {
   const initial = createInitialStore()
@@ -275,15 +294,13 @@ function applyCyberSecuritySeedMigration(store: CmsStore): CmsStore {
 }
 
 async function persistStore(store: CmsStore) {
-  // On MongoDB, skip in-memory cache so every instance reads fresh writes
-  if (!isMongoEnabled()) {
-    memoryStore = store
-  }
+  setCachedStore(store)
   await writeRawStore(store)
 }
 
 export async function getStore(): Promise<CmsStore> {
-  if (!isMongoEnabled() && memoryStore) return memoryStore
+  const cached = getCachedStore()
+  if (cached) return cached
 
   const raw = await readRawStore()
   if (!raw) {
@@ -305,9 +322,7 @@ export async function getStore(): Promise<CmsStore> {
     return store
   }
 
-  if (!isMongoEnabled()) {
-    memoryStore = store
-  }
+  setCachedStore(store)
   return store
 }
 
@@ -316,7 +331,7 @@ export async function saveStore(store: CmsStore) {
     ...store,
     profileVersion: PROFILE_VERSION,
   })
-  memoryStore = null
+  clearCachedStore()
   await persistStore(synced)
   try {
     const { revalidatePublicContent } = await import('@/lib/cms/revalidate')
