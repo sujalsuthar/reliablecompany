@@ -25,6 +25,7 @@ const FIELDS = [
   { key: 'address', label: 'Address', multiline: true },
   { key: 'linkedIn', label: 'LinkedIn URL' },
   { key: 'twitter', label: 'Twitter URL' },
+  { key: 'facebook', label: 'Facebook URL' },
   { key: 'copyrightText', label: 'Copyright Text' },
 ] as const
 

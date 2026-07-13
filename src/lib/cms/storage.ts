@@ -1,42 +1,19 @@
 import { promises as fs } from 'fs'
 import path from 'path'
 
-import { createClient, type VercelKV } from '@vercel/kv'
-
 import type { CmsStore } from '@/lib/cms/types'
+import { getDb, isMongoEnabled } from '@/lib/cms/mongodb'
 
 const STORE_PATH = path.join(process.cwd(), 'data', 'cms-store.json')
-const KV_STORE_KEY = 'cms:store'
+const STORE_DOC_ID = 'main' as const
 
-let kvClient: VercelKV | null = null
-
-function getKvUrl(): string | undefined {
-  return process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+type CmsStoreDocument = {
+  _id: typeof STORE_DOC_ID
+  data: CmsStore
+  updatedAt?: Date
 }
 
-function getKvToken(): string | undefined {
-  return process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
-}
-
-export function isKvEnabled(): boolean {
-  return Boolean(getKvUrl() && getKvToken())
-}
-
-function getKv(): VercelKV {
-  if (!kvClient) {
-    const url = getKvUrl()
-    const token = getKvToken()
-    if (!url || !token) {
-      throw new Error('KV is not configured')
-    }
-    kvClient = createClient({ url, token })
-  }
-  return kvClient
-}
-
-export function isBlobEnabled(): boolean {
-  return Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_BLOB_TOKEN)
-}
+export { isMongoEnabled }
 
 async function readStoreFromDisk(): Promise<CmsStore | null> {
   try {
@@ -52,54 +29,64 @@ async function writeStoreToDisk(store: CmsStore): Promise<void> {
   await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), 'utf-8')
 }
 
-async function readStoreFromKv(): Promise<CmsStore | null> {
+async function readStoreFromMongo(): Promise<CmsStore | null> {
   try {
-    const data = await getKv().get<CmsStore>(KV_STORE_KEY)
-    return data ?? null
+    const db = await getDb()
+    const doc = await db
+      .collection<CmsStoreDocument>('cms_store')
+      .findOne({ _id: STORE_DOC_ID })
+    return doc?.data ?? null
   } catch (error) {
-    console.error('[cms] KV read failed:', error)
+    console.error('[cms] MongoDB read failed:', error)
     return null
   }
 }
 
-async function writeStoreToKv(store: CmsStore): Promise<void> {
+async function writeStoreToMongo(store: CmsStore): Promise<void> {
   try {
-    await getKv().set(KV_STORE_KEY, store)
+    const db = await getDb()
+    await db.collection<CmsStoreDocument>('cms_store').updateOne(
+      { _id: STORE_DOC_ID },
+      { $set: { data: store, updatedAt: new Date() } },
+      { upsert: true },
+    )
   } catch (error) {
-    console.error('[cms] KV write failed:', error)
+    console.error('[cms] MongoDB write failed:', error)
     throw new Error(
-      'Could not save to database. Check KV_REST_API_URL and KV_REST_API_TOKEN in Vercel.',
+      'Could not save to database. Check MONGODB_URI and MONGODB_DB_NAME in your environment.',
     )
   }
 }
 
 export async function readRawStore(): Promise<CmsStore | null> {
-  if (isKvEnabled()) {
-    const fromKv = await readStoreFromKv()
-    if (fromKv) return fromKv
+  if (isMongoEnabled()) {
+    const fromMongo = await readStoreFromMongo()
+    if (fromMongo) return fromMongo
+
     const fromDisk = await readStoreFromDisk()
     if (fromDisk) {
       try {
-        await writeStoreToKv(fromDisk)
+        await writeStoreToMongo(fromDisk)
       } catch (error) {
-        console.error('[cms] KV seed from disk failed:', error)
+        console.error('[cms] MongoDB seed from disk failed:', error)
       }
       return fromDisk
     }
     return null
   }
+
   return readStoreFromDisk()
 }
 
 export async function writeRawStore(store: CmsStore): Promise<void> {
-  if (isKvEnabled()) {
-    await writeStoreToKv(store)
+  if (isMongoEnabled()) {
+    await writeStoreToMongo(store)
     return
   }
 
   if (process.env.VERCEL) {
     throw new Error(
-      'CMS storage is not configured on Vercel. Connect Upstash Redis and set KV_REST_API_URL + KV_REST_API_TOKEN.',
+      'CMS storage is not configured on Vercel. Set MONGODB_URI to a MongoDB Atlas connection string.',
     )
   }
 

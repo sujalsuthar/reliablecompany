@@ -5,6 +5,7 @@ import { Loader2, Send } from 'lucide-react'
 import { FormEvent, useState } from 'react'
 
 import { useLocale } from '@/components/providers/LocaleProvider'
+import PdplConsentField from '@/components/ui/PdplConsentField'
 
 type MessagesContactForm = ReturnType<
   typeof import('@/lib/i18n/messages').getMessages
@@ -21,6 +22,7 @@ interface FormData {
   city: CityOption | ''
   service: ServiceOption | ''
   message: string
+  consent: boolean
 }
 
 interface FormErrors {
@@ -30,6 +32,7 @@ interface FormErrors {
   city?: string
   service?: string
   message?: string
+  consent?: string
 }
 
 const initialFormData: FormData = {
@@ -40,6 +43,7 @@ const initialFormData: FormData = {
   city: '',
   service: '',
   message: '',
+  consent: false,
 }
 
 const inputClasses =
@@ -77,6 +81,9 @@ export default function ContactForm() {
       next.message = t.errors.messageRequired
     } else if (data.message.trim().length < 10) {
       next.message = t.errors.messageShort
+    }
+    if (!data.consent) {
+      next.consent = t.errors.consent ?? messages.legal.consentRequired
     }
 
     return next
@@ -126,6 +133,7 @@ export default function ContactForm() {
           service: formData.service,
           division: t.services[formData.service as ServiceOption],
           message: formData.message,
+          consent: formData.consent,
         }),
       })
 
@@ -311,6 +319,12 @@ export default function ContactForm() {
           {submitError}
         </p>
       )}
+
+      <PdplConsentField
+        checked={formData.consent}
+        onChange={(consent) => updateField('consent', consent)}
+        error={errors.consent}
+      />
 
       <button
         type="submit"

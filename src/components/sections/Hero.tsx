@@ -45,12 +45,15 @@ export default async function Hero() {
           alt={hero.backgroundImage?.alt ?? ''}
           fill
           priority
-          className="object-cover opacity-25"
+          className="object-cover opacity-45"
           sizes="100vw"
         />
       )}
 
-      <div className="absolute inset-0 bg-primary-900/50" aria-hidden />
+      <div
+        className="absolute inset-0 bg-gradient-to-r from-primary-900/95 via-primary-900/80 to-primary-900/40"
+        aria-hidden
+      />
 
       <HeroFloatingCircles />
 
@@ -87,12 +90,23 @@ export default async function Hero() {
               </Link>
             )}
             {hero.secondaryButtonText && hero.secondaryButtonLink && (
-              <Link
-                href={hero.secondaryButtonLink}
-                className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-accent-400/50 bg-transparent px-8 py-3 text-[15px] font-medium text-white transition-colors hover:border-accent-400 hover:bg-white/5 sm:w-auto"
-              >
-                {hero.secondaryButtonText}
-              </Link>
+              hero.secondaryButtonLink.startsWith('http') ? (
+                <a
+                  href={hero.secondaryButtonLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-accent-400/50 bg-transparent px-8 py-3 text-[15px] font-medium text-white transition-colors hover:border-accent-400 hover:bg-white/5 sm:w-auto"
+                >
+                  {hero.secondaryButtonText}
+                </a>
+              ) : (
+                <Link
+                  href={hero.secondaryButtonLink}
+                  className="inline-flex min-h-[48px] w-full items-center justify-center rounded-full border border-accent-400/50 bg-transparent px-8 py-3 text-[15px] font-medium text-white transition-colors hover:border-accent-400 hover:bg-white/5 sm:w-auto"
+                >
+                  {hero.secondaryButtonText}
+                </Link>
+              )
             )}
           </div>
 

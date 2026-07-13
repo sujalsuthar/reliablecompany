@@ -1,4 +1,5 @@
 const MAX_UPLOAD_BYTES = 5 * 1024 * 1024 // 5 MB
+const MAX_RESUME_BYTES = 10 * 1024 * 1024 // 10 MB
 
 const ALLOWED_IMAGE_TYPES = new Set([
   'image/jpeg',
@@ -77,4 +78,50 @@ export function validateImageUpload(
   return { ok: true, mime: detectedMime }
 }
 
-export { MAX_UPLOAD_BYTES }
+const ALLOWED_RESUME_TYPES = new Set([
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+])
+
+function detectResumeMime(buffer: Buffer): string | null {
+  const head = buffer.subarray(0, Math.min(buffer.length, 1024)).toString('latin1')
+  const pdfIndex = head.indexOf('%PDF')
+  if (pdfIndex >= 0 && pdfIndex < 1024) {
+    return 'application/pdf'
+  }
+  if (buffer.length >= 4 && buffer[0] === 0xd0 && buffer[1] === 0xcf && buffer[2] === 0x11 && buffer[3] === 0xe0) {
+    return 'application/msword'
+  }
+  if (buffer.length >= 4 && buffer[0] === 0x50 && buffer[1] === 0x4b) {
+    return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+  }
+  return null
+}
+
+export function validateResumeUpload(
+  file: File,
+  buffer: Buffer,
+): UploadValidationResult | UploadValidationError {
+  if (file.size > MAX_RESUME_BYTES) {
+    return { ok: false, error: 'Resume exceeds the 10 MB size limit.' }
+  }
+
+  if (file.size === 0) {
+    return { ok: false, error: 'Empty file.' }
+  }
+
+  const name = file.name.toLowerCase()
+  if (!/\.(pdf|doc|docx)$/.test(name)) {
+    return { ok: false, error: 'Only PDF, DOC, or DOCX files are allowed.' }
+  }
+
+  const detectedMime = detectResumeMime(buffer)
+  if (!detectedMime || !ALLOWED_RESUME_TYPES.has(detectedMime)) {
+    return { ok: false, error: 'Invalid resume file. Upload PDF, DOC, or DOCX only.' }
+  }
+
+  return { ok: true, mime: detectedMime }
+}
+
+export { MAX_UPLOAD_BYTES, MAX_RESUME_BYTES }

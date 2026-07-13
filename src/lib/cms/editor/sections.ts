@@ -21,6 +21,17 @@ export const SECTION_DEFINITIONS: Record<SectionType, SectionDefinition> = {
       { path: 'hero.backgroundImage', type: 'image', label: 'Background Image' },
     ],
   },
+  campaigns: {
+    type: 'campaigns',
+    label: 'Campaigns',
+    description: 'Active marketing campaigns (manage items in Campaigns CMS)',
+    icon: 'Megaphone',
+    fields: [
+      { path: 'sectionContent.campaigns.label', type: 'text', label: 'Section Label' },
+      { path: 'sectionContent.campaigns.title', type: 'text', label: 'Section Title' },
+      { path: 'sectionContent.campaigns.description', type: 'richtext', label: 'Description' },
+    ],
+  },
   services: {
     type: 'services',
     label: 'Services',
@@ -173,14 +184,27 @@ export const SECTION_DEFINITIONS: Record<SectionType, SectionDefinition> = {
       { path: 'sectionContent.blog.title', type: 'text', label: 'Title' },
     ],
   },
+  certifications: {
+    type: 'certifications',
+    label: 'Certifications',
+    description: 'Certification & accreditation logos (manage items in Certifications CMS)',
+    icon: 'BadgeCheck',
+    fields: [
+      { path: 'sectionContent.certifications.label', type: 'text', label: 'Section Label' },
+      { path: 'sectionContent.certifications.title', type: 'text', label: 'Section Title' },
+      { path: 'sectionContent.certifications.description', type: 'richtext', label: 'Description' },
+    ],
+  },
 }
 
 export const DEFAULT_HOMEPAGE_SECTIONS: SectionType[] = [
   'hero',
+  'campaigns',
   'services',
   'whyUs',
   'industries',
   'divisions',
+  'certifications',
   'projects',
   'cta',
 ]

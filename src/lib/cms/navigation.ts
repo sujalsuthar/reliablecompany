@@ -24,6 +24,8 @@ export const ADMIN_PATH_TO_COLLECTION: Record<string, CmsCollection> = {
   certifications: 'certifications',
   values: 'values',
   'why-stats': 'whyStats',
+  campaigns: 'campaigns',
+  'campaign-applications': 'campaignApplications',
 }
 
 export function resolveCollectionPath(path: string): CmsCollection | null {
@@ -46,6 +48,7 @@ export const ADMIN_NAV: AdminNavSection[] = [
       { label: 'Careers', href: '/admin/careers', collection: 'careers' },
       { label: 'Career Applications', href: '/admin/career-applications', collection: 'careerApplications' },
       { label: 'New Enquiries', href: '/admin/enquiries', collection: 'enquiries' },
+      { label: 'Campaign Applications', href: '/admin/campaign-applications', collection: 'campaignApplications' },
       { label: 'Services', href: '/admin/services', collection: 'services' },
       { label: 'Industries', href: '/admin/industries', collection: 'industries' },
     ],
@@ -54,6 +57,8 @@ export const ADMIN_NAV: AdminNavSection[] = [
     title: 'SITE',
     items: [
       { label: 'Banner Management', href: '/admin/banner' },
+      { label: 'Campaigns', href: '/admin/campaigns', collection: 'campaigns' },
+      { label: 'Page & Site Images', href: '/admin/site-images' },
       { label: 'About Us', href: '/admin/about' },
       { label: 'Certifications', href: '/admin/certifications', collection: 'certifications' },
       { label: 'Divisions', href: '/admin/divisions', collection: 'divisions' },

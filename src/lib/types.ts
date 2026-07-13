@@ -68,7 +68,10 @@ export interface ServiceListItem extends SanityDocument {
   shortDescriptionAr?: string
   category?: string
   categoryAr?: string
+  /** Top banner image on the service detail page */
   heroImageSrc?: string
+  /** Image beside the overview section (below the hero) */
+  overviewImageSrc?: string
   order?: number
 }
 
@@ -197,6 +200,7 @@ export interface SiteSettings extends SanityDocument {
   addressAr?: string
   linkedIn?: string
   twitter?: string
+  facebook?: string
 }
 
 export interface Page extends SanityDocument {

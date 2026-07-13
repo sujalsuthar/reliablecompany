@@ -1,55 +1,71 @@
 import Link from 'next/link'
-import { ChevronRight } from 'lucide-react'
+import {
+  ArrowRight,
+  ChevronRight,
+  ClipboardCheck,
+  ShieldAlert,
+  ShieldCheck,
+  Target,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
-import ServicesGrid from '@/components/sections/ServicesGrid'
 import SectionHeader from '@/components/ui/SectionHeader'
-import { getSectionContent, getServices } from '@/lib/content'
+import { getSectionContent } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { getMessages } from '@/lib/i18n/messages'
+import { SERVICE_CATEGORIES } from '@/lib/service-catalog'
 
-function ServiceCardSkeleton() {
-  return (
-    <div className="card-base animate-pulse p-6">
-      <div className="mb-4 h-12 w-12 rounded-xl bg-primary-100" />
-      <div className="mb-2 h-5 w-3/4 rounded bg-gray-200" />
-      <div className="space-y-2">
-        <div className="h-3 w-full rounded bg-gray-200" />
-        <div className="h-3 w-5/6 rounded bg-gray-200" />
-      </div>
-    </div>
-  )
+const CATEGORY_ICON: Record<string, LucideIcon> = {
+  offensive: Target,
+  grc: ClipboardCheck,
+  incident: ShieldAlert,
+  assessments: ShieldCheck,
 }
 
 export default async function Services() {
   const locale = await getLocale()
   const ui = getMessages(locale)
-  const [services, header] = await Promise.all([
-    getServices(),
-    getSectionContent('services'),
-  ])
-  const hasServices = services.length > 0
+  const header = await getSectionContent('services')
+  const isAr = locale === 'ar'
 
   return (
     <section className="section-pad bg-white">
       <div className="site-container">
         <SectionHeader
           label={header?.label ?? 'Services'}
-          title={header?.title ?? 'Integrated Engineering Services'}
+          title={header?.title ?? 'Cybersecurity Services'}
           description={
             header?.description ??
-            'From structural design to IT infrastructure, we deliver end-to-end engineering solutions tailored to complex projects across Saudi Arabia.'
+            'End-to-end offensive security, compliance, incident response, and security assessment services across Saudi Arabia.'
           }
         />
 
-        {hasServices ? (
-          <ServicesGrid services={services} />
-        ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, index) => (
-              <ServiceCardSkeleton key={index} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          {SERVICE_CATEGORIES.map((category) => {
+            const Icon = CATEGORY_ICON[category.id] ?? ShieldCheck
+            const name = isAr ? category.nameAr : category.name
+            const description = isAr ? category.descriptionAr : category.description
+            return (
+              <Link
+                key={category.id}
+                href="/services"
+                className="card-base group flex flex-col p-6 transition-colors hover:border-primary-200 sm:p-8"
+              >
+                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 transition-colors group-hover:bg-primary-600 group-hover:text-white">
+                  <Icon className="h-6 w-6" aria-hidden />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold text-gray-900">{name}</h3>
+                <p className="mb-5 flex-1 text-sm leading-relaxed text-gray-600">
+                  {description}
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-600">
+                  {ui.sections.viewAllServices}
+                  <ArrowRight className="icon-rtl-flip h-4 w-4" aria-hidden />
+                </span>
+              </Link>
+            )
+          })}
+        </div>
 
         <div className="mt-12 text-center">
           <Link

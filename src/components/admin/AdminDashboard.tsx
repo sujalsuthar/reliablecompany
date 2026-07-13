@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
 import AdminHeader from '@/components/admin/AdminHeader'
+import ExportCmsButton from '@/components/admin/ExportCmsButton'
 import StatusBadge from '@/components/admin/StatusBadge'
 
 interface DashboardStats {
@@ -52,12 +53,15 @@ export default function AdminDashboard() {
         title="Dashboard"
         description="Welcome to the Reliable Engineering CMS — manage all content here."
         action={
-          <Link
-            href="/admin/site-changes"
-            className="btn-primary inline-flex gap-2"
-          >
-            Open Site Changes
-          </Link>
+          <div className="flex flex-wrap items-center gap-3">
+            <ExportCmsButton />
+            <Link
+              href="/admin/site-changes"
+              className="btn-primary inline-flex gap-2"
+            >
+              Open Site Changes
+            </Link>
+          </div>
         }
       />
 

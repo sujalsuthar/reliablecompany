@@ -1,0 +1,15 @@
+# Apache reverse proxy for cPanel when Node.js app runs on a local port.
+# cPanel "Setup Node.js App" usually configures this automatically.
+# Use this file only if your host requires manual proxy rules.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Do not proxy existing files/directories
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # Proxy to Node.js (update port if cPanel assigns a different one)
+  RewriteRule ^(.*)$ http://127.0.0.1:%{ENV:PORT}/$1 [P,L]
+</IfModule>

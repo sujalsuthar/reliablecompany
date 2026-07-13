@@ -93,6 +93,10 @@ export function itemToFormValues(collection: CmsCollection, item: any): Record<s
     values.bulletPoints = item.bulletPoints ?? []
   }
 
+  if (collection === 'careers') {
+    values.responsibilities = item.responsibilities ?? []
+  }
+
   if (collection === 'team') {
     values.photoSrc = item.photo?.src ?? ''
   }
@@ -124,9 +128,10 @@ export function formValuesToItem(collection: CmsCollection, values: Record<strin
       titleAr: values.titleAr,
       slug: { _type: 'slug', current: slug },
       icon: values.icon,
-      category: values.category || 'Engineering Services',
+      category: values.category || 'Cybersecurity Services',
       categoryAr: values.categoryAr,
-      heroImageSrc: values.heroImageSrc,
+      heroImageSrc: values.heroImageSrc || undefined,
+      overviewImageSrc: values.overviewImageSrc || undefined,
       shortDescription: values.shortDescription,
       shortDescriptionAr: values.shortDescriptionAr,
       overviewTitle: values.overviewTitle,
@@ -286,9 +291,17 @@ export function formValuesToItem(collection: CmsCollection, values: Record<strin
     }
   }
 
-  if (collection === 'industries' || collection === 'careers' || collection === 'certifications' || collection === 'values' || collection === 'whyStats') {
+  if (collection === 'industries' || collection === 'certifications' || collection === 'values' || collection === 'whyStats') {
     if ('order' in data) data.order = Number(values.order) || 0
     return data
+  }
+
+  if (collection === 'careers') {
+    return {
+      ...data,
+      responsibilities: tagsToArray(values.responsibilities),
+      order: Number(values.order) || 0,
+    }
   }
 
   return data

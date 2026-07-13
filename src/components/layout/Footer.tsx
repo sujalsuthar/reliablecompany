@@ -10,7 +10,7 @@ import Logo from '@/components/layout/Logo'
 
 import ContactDetails from '@/components/ui/ContactDetails'
 
-import { CERTIFICATIONS_FOOTER_IMAGE, COMPANY_PHONE } from '@/lib/brand'
+import { CERTIFICATIONS_FOOTER_IMAGE, COMPANY_FACEBOOK_URL, COMPANY_PHONE } from '@/lib/brand'
 
 import { getFooterContent, getGlobalContent, getSiteSettings } from '@/lib/content'
 
@@ -27,6 +27,14 @@ const Linkedin = createLucideIcon('Linkedin', [
   ['rect', { width: '4', height: '12', x: '2', y: '9' }],
 
   ['circle', { cx: '4', cy: '4', r: '2' }],
+
+])
+
+
+
+const Facebook = createLucideIcon('Facebook', [
+
+  ['path', { d: 'M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z' }],
 
 ])
 
@@ -70,11 +78,15 @@ export default async function Footer() {
 
 
 
-  const phone = globalContent.phone || siteSettings?.phone || COMPANY_PHONE
+  const phone = siteSettings?.phone || globalContent.phone || COMPANY_PHONE
 
-  const email = globalContent.email || siteSettings?.email
+  const email = siteSettings?.email || globalContent.email
 
-  const address = globalContent.address || siteSettings?.address
+  // Prioritize Site Settings so footer address is editable from CMS.
+  const address = siteSettings?.address || globalContent.address
+
+  const linkedIn = siteSettings?.linkedIn || globalContent.linkedIn
+  const facebook = siteSettings?.facebook || globalContent.facebook || COMPANY_FACEBOOK_URL
 
 
 
@@ -128,27 +140,53 @@ export default async function Footer() {
 
             )}
 
-            {siteSettings?.linkedIn && (
+            {(linkedIn || facebook) && (
 
               <div className="mt-6 flex items-center gap-3">
 
-                <a
+                {linkedIn && (
 
-                  href={siteSettings.linkedIn}
+                  <a
 
-                  target="_blank"
+                    href={linkedIn}
 
-                  rel="noopener noreferrer"
+                    target="_blank"
 
-                  className="flex h-11 w-11 items-center justify-center rounded-md bg-primary-800 text-gray-300 transition-colors hover:bg-primary-700 hover:text-white"
+                    rel="noopener noreferrer"
 
-                  aria-label="LinkedIn"
+                    className="flex h-11 w-11 items-center justify-center rounded-md bg-primary-800 text-gray-300 transition-colors hover:bg-primary-700 hover:text-white"
 
-                >
+                    aria-label="LinkedIn"
 
-                  <Linkedin className="h-4 w-4" aria-hidden />
+                  >
 
-                </a>
+                    <Linkedin className="h-4 w-4" aria-hidden />
+
+                  </a>
+
+                )}
+
+                {facebook && (
+
+                  <a
+
+                    href={facebook}
+
+                    target="_blank"
+
+                    rel="noopener noreferrer"
+
+                    className="flex h-11 w-11 items-center justify-center rounded-md bg-primary-800 text-gray-300 transition-colors hover:bg-primary-700 hover:text-white"
+
+                    aria-label="Facebook"
+
+                  >
+
+                    <Facebook className="h-4 w-4" aria-hidden />
+
+                  </a>
+
+                )}
 
               </div>
 
@@ -229,7 +267,10 @@ export default async function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-primary-800 pt-8 sm:flex-row">
 
-          <p className="text-sm text-gray-400">{globalContent.copyrightText}</p>
+          <div className="text-center sm:text-start">
+            <p className="text-sm text-gray-400">{globalContent.copyrightText}</p>
+            <p className="mt-1 text-xs text-gray-500">{m.footer.legalNotice}</p>
+          </div>
 
           <div className="flex items-center gap-6">
 

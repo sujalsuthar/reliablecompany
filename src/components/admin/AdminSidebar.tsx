@@ -8,6 +8,7 @@ import { usePathname, useRouter } from 'next/navigation'
 
 import { ADMIN_NAV } from '@/lib/cms/navigation'
 import { LOGO_ALT, LOGO_PATH } from '@/lib/brand'
+import ExportCmsButton from '@/components/admin/ExportCmsButton'
 
 export default function AdminSidebar() {
   const pathname = usePathname()
@@ -73,6 +74,7 @@ export default function AdminSidebar() {
           <p className="text-sm font-medium">admin</p>
           <p className="text-xs text-white/50">Administrator</p>
         </div>
+        <ExportCmsButton variant="sidebar" className="mb-2" />
         <button
           type="button"
           onClick={handleLogout}

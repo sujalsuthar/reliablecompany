@@ -1,0 +1,809 @@
+import type { PortableTextBlock } from '@portabletext/types'
+
+import type { Division, Service } from '@/lib/types'
+import { PROFILE_IMAGES } from '@/lib/profile-content'
+
+export type ServiceCategoryName =
+  | 'Offensive Security'
+  | 'GRC & Compliance'
+  | 'Incident Response & Resilience'
+  | 'Security Assessments'
+
+export interface CatalogService {
+  id: string
+  title: string
+  titleAr: string
+  slug: string
+  icon: string
+  shortDescription: string
+  shortDescriptionAr: string
+  paragraphs: [string, string]
+}
+
+export interface ServiceCategory {
+  id: string
+  name: ServiceCategoryName
+  nameAr: string
+  tagline: string
+  taglineAr: string
+  divisionSlug: string
+  description: string
+  descriptionAr: string
+  bulletPoints: string[]
+  bulletPointsAr: string[]
+  services: CatalogService[]
+}
+
+function block(text: string, key: string): PortableTextBlock {
+  return {
+    _type: 'block',
+    _key: key,
+    style: 'normal',
+    markDefs: [],
+    children: [{ _type: 'span', _key: `${key}-span`, text, marks: [] }],
+  }
+}
+
+function blocks(...paragraphs: string[]): PortableTextBlock[] {
+  return paragraphs.map((text, i) => block(text, `b${i}`))
+}
+
+export const SERVICE_CATEGORIES: ServiceCategory[] = [
+  {
+    id: 'offensive',
+    name: 'Offensive Security',
+    nameAr: 'الأمن الهجومي',
+    tagline: 'PENTEST • RED TEAM • VAPT',
+    taglineAr: 'اختبار اختراق • فريق أحمر • VAPT',
+    divisionSlug: 'offensive-security',
+    description:
+      'Real-world penetration testing, red team exercises, and vulnerability assessments across web, mobile, network, API, OT, and IoT environments.',
+    descriptionAr:
+      'اختبار اختراق واقعي وتمارين الفريق الأحمر وتقييم الثغرات عبر الويب والجوال والشبكات وAPI وOT وIoT.',
+    bulletPoints: [
+      'Web, mobile, and API penetration testing',
+      'Network penetration testing (internal / external)',
+      'Red team and vulnerability assessments',
+      'OT, IoT, and source code security reviews',
+    ],
+    bulletPointsAr: [
+      'اختبار اختراق الويب والجوال وAPI',
+      'اختبار اختراق الشبكات (داخلي / خارجي)',
+      'الفريق الأحمر وتقييم الثغرات',
+      'مراجعة أمن OT وIoT والشيفرة المصدرية',
+    ],
+    services: [
+      {
+        id: 'svc-wapt',
+        title: 'Web Application Penetration Testing (WAPT)',
+        titleAr: 'اختبار اختراق تطبيقات الويب (WAPT)',
+        slug: 'web-application-penetration-testing',
+        icon: 'Globe',
+        shortDescription:
+          'In-depth OWASP-based testing of web applications to uncover authentication, authorization, and business logic flaws.',
+        shortDescriptionAr:
+          'اختبار معمق لتطبيقات الويب وفق OWASP لاكتشاف ثغرات المصادقة والتفويض ومنطق الأعمال.',
+        paragraphs: [
+          'Web applications remain the primary attack surface for most organizations. Our WAPT engagements assess authentication, session management, input validation, access controls, and business logic across customer-facing and internal platforms.',
+          'Deliverables include prioritized findings with proof-of-concept exploits, remediation guidance, and optional retest validation.',
+        ],
+      },
+      {
+        id: 'svc-mobile',
+        title: 'Mobile Application Security Testing (Android / iOS)',
+        titleAr: 'اختبار أمان تطبيقات الجوال (Android / iOS)',
+        slug: 'mobile-application-security-testing',
+        icon: 'Smartphone',
+        shortDescription:
+          'Static, dynamic, and runtime security analysis of Android and iOS applications and their backend integrations.',
+        shortDescriptionAr:
+          'تحليل أمني ثابت وديناميكي وتشغيلي لتطبيقات Android وiOS وتكاملاتها الخلفية.',
+        paragraphs: [
+          'Mobile apps process sensitive data and connect to APIs that attackers actively target. We assess insecure storage, weak cryptography, improper platform usage, certificate pinning bypass, and API/backend weaknesses.',
+          'Testing covers both client-side application security and server-side components for end-to-end assurance.',
+        ],
+      },
+      {
+        id: 'svc-network-pt',
+        title: 'Network Penetration Testing (Internal / External)',
+        titleAr: 'اختبار اختراق الشبكات (داخلي / خارجي)',
+        slug: 'network-penetration-testing',
+        icon: 'Network',
+        shortDescription:
+          'External and internal network penetration testing for perimeters, segments, firewalls, and critical infrastructure.',
+        shortDescriptionAr:
+          'اختبار اختراق شبكات خارجي وداخلي للمحيط والقطاعات والجدران النارية والبنية التحتية الحرجة.',
+        paragraphs: [
+          'We simulate real attacker paths against your network perimeter and internal segments to identify exploitable misconfigurations, weak segmentation, and exposed services.',
+          'Engagements align with industry frameworks and Saudi NCA cybersecurity controls for industrial and enterprise environments.',
+        ],
+      },
+      {
+        id: 'svc-api',
+        title: 'API Security Testing',
+        titleAr: 'اختبار أمان واجهات API',
+        slug: 'api-security-testing',
+        icon: 'Code',
+        shortDescription:
+          'Dedicated API penetration testing for REST, GraphQL, and microservices architectures.',
+        shortDescriptionAr:
+          'اختبار اختراق مخصص لواجهات REST وGraphQL والخدمات المصغرة.',
+        paragraphs: [
+          'APIs connect web, mobile, and third-party systems — making them a high-value target. We test for broken authentication, excessive data exposure, injection, and authorization flaws.',
+          'Our assessments help secure integrations before they reach production or after major releases.',
+        ],
+      },
+      {
+        id: 'svc-red-team',
+        title: 'Red Team Assessment',
+        titleAr: 'تقييم الفريق الأحمر',
+        slug: 'red-team-assessment',
+        icon: 'Target',
+        shortDescription:
+          'Adversary simulation exercises that test detection, response, and resilience against targeted attacks.',
+        shortDescriptionAr:
+          'تمارين محاكاة الخصم لاختبار الاكتشاف والاستجابة والمرونة ضد الهجمات المستهدفة.',
+        paragraphs: [
+          'Red team engagements go beyond vulnerability scanning to simulate sophisticated threat actors pursuing specific objectives across your environment.',
+          'Exercises validate security monitoring, incident response playbooks, and organizational readiness under realistic attack scenarios.',
+        ],
+      },
+      {
+        id: 'svc-vuln',
+        title: 'Vulnerability Assessment',
+        titleAr: 'تقييم الثغرات',
+        slug: 'vulnerability-assessment',
+        icon: 'Search',
+        shortDescription:
+          'Systematic identification and prioritization of vulnerabilities across infrastructure, applications, and cloud assets.',
+        shortDescriptionAr:
+          'تحديد وترتيب أولويات الثغرات عبر البنية التحتية والتطبيقات وأصول السحابة.',
+        paragraphs: [
+          'Vulnerability assessments provide a comprehensive view of security weaknesses using automated and manual validation techniques.',
+          'Results are prioritized by exploitability and business impact to focus remediation efforts where they matter most.',
+        ],
+      },
+      {
+        id: 'svc-secure-config',
+        title: 'Secure Configuration Review',
+        titleAr: 'مراجعة التكوين الآمن',
+        slug: 'secure-configuration-review',
+        icon: 'Settings',
+        shortDescription:
+          'Review of system, network, and application configurations against security benchmarks and hardening standards.',
+        shortDescriptionAr:
+          'مراجعة تكوينات الأنظمة والشبكات والتطبيقات وفق معايير الأمان والتصلّب.',
+        paragraphs: [
+          'Misconfigurations are a leading cause of breaches. We assess servers, network devices, cloud resources, and applications against CIS benchmarks and vendor best practices.',
+          'Deliverables include a prioritized hardening roadmap with configuration change recommendations.',
+        ],
+      },
+      {
+        id: 'svc-source-code',
+        title: 'Source Code Security Review',
+        titleAr: 'مراجعة أمن الشيفرة المصدرية',
+        slug: 'source-code-security-review',
+        icon: 'FileCode',
+        shortDescription:
+          'Manual and tool-assisted review of application source code to identify security defects before deployment.',
+        shortDescriptionAr:
+          'مراجعة يدوية وآلية للشيفرة المصدرية لاكتشاف العيوب الأمنية قبل النشر.',
+        paragraphs: [
+          'Source code reviews uncover logic flaws, injection vulnerabilities, and insecure coding patterns that automated scanners miss.',
+          'Our reviewers work with development teams to integrate secure coding practices into the SDLC.',
+        ],
+      },
+      {
+        id: 'svc-ot',
+        title: 'OT Security Testing',
+        titleAr: 'اختبار أمن أنظمة التشغيل (OT)',
+        slug: 'ot-security-testing',
+        icon: 'Factory',
+        shortDescription:
+          'Security assessment of operational technology and industrial control systems in critical infrastructure environments.',
+        shortDescriptionAr:
+          'تقييم أمن تقنية التشغيل وأنظمة التحكم الصناعي في البيئات الحرجة.',
+        paragraphs: [
+          'OT environments in oil & gas, utilities, and manufacturing require specialized testing that respects operational constraints while identifying real risks.',
+          'We assess segmentation, protocol security, engineering workstation exposure, and attack paths between IT and OT networks.',
+        ],
+      },
+      {
+        id: 'svc-iot',
+        title: 'IoT / Device Security Testing',
+        titleAr: 'اختبار أمن IoT / الأجهزة',
+        slug: 'iot-device-security-testing',
+        icon: 'Cpu',
+        shortDescription:
+          'Hardware and firmware security testing for IoT devices, embedded systems, and connected industrial equipment.',
+        shortDescriptionAr:
+          'اختبار أمن الأجهزة والبرامج الثابتة لإنترنت الأشياء والأنظمة المدمجة والمعدات المتصلة.',
+        paragraphs: [
+          'Connected devices expand attack surfaces across smart buildings, industrial plants, and consumer products. We test firmware, communication protocols, and cloud integrations.',
+          'Assessments include physical interface testing, firmware analysis, and over-the-air update security review.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'grc',
+    name: 'GRC & Compliance',
+    nameAr: 'الحوكمة والمخاطر والامتثال',
+    tagline: 'GAP • ISMS • AUDITS',
+    taglineAr: 'فجوات • ISMS • تدقيق',
+    divisionSlug: 'grc-compliance',
+    description:
+      'Governance, risk, and compliance services including gap assessments and ISMS audits aligned with ISO 27001 and Saudi regulatory frameworks.',
+    descriptionAr:
+      'خدمات الحوكمة والمخاطر والامتثال بما في ذلك تقييم الفجوات وتدقيق ISMS وفق ISO 27001 والأطر التنظيمية السعودية.',
+    bulletPoints: [
+      'Gap assessment against ISO 27001 and NCA controls',
+      'ISMS audits and certification readiness',
+      'Risk registers and compliance roadmaps',
+      'Board-ready reporting and documentation',
+    ],
+    bulletPointsAr: [
+      'تقييم الفجوات وفق ISO 27001 وضوابط NCA',
+      'تدقيق ISMS والاستعداد للشهادة',
+      'سجلات المخاطر وخرائط الامتثال',
+      'تقارير وتوثيق جاهزة للإدارة',
+    ],
+    services: [
+      {
+        id: 'svc-gap',
+        title: 'Gap Assessment',
+        titleAr: 'تقييم الفجوات',
+        slug: 'gap-assessment',
+        icon: 'ClipboardCheck',
+        shortDescription:
+          'Structured gap analysis against ISO 27001, NCA ECC, and other cybersecurity frameworks.',
+        shortDescriptionAr:
+          'تحليل منظم للفجوات وفق ISO 27001 وضوابط NCA ECC وأطر الأمن السيبراني.',
+        paragraphs: [
+          'Gap assessments identify where your current security posture falls short of regulatory and framework requirements.',
+          'We deliver actionable remediation plans with prioritized controls, timelines, and resource estimates.',
+        ],
+      },
+      {
+        id: 'svc-isms',
+        title: 'ISMS Audits',
+        titleAr: 'تدقيق ISMS',
+        slug: 'isms-audits',
+        icon: 'Award',
+        shortDescription:
+          'Information Security Management System audits for internal readiness and certification support.',
+        shortDescriptionAr:
+          'تدقيق نظام إدارة أمن المعلومات للاستعداد الداخلي ودعم الشهادة.',
+        paragraphs: [
+          'ISMS audits evaluate policies, procedures, controls, and evidence against ISO 27001 requirements.',
+          'Our auditors help prepare your organization for internal audits and external certification bodies.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'incident',
+    name: 'Incident Response & Resilience',
+    nameAr: 'الاستجابة للحوادث والمرونة',
+    tagline: 'IR • RANSOMWARE • RECOVERY',
+    taglineAr: 'استجابة • فدية • استعادة',
+    divisionSlug: 'incident-response-resilience',
+    description:
+      'Rapid incident response and ransomware recovery support to contain threats, restore operations, and strengthen resilience.',
+    descriptionAr:
+      'استجابة سريعة للحوادث ودعم استعادة الفدية البرمجية لاحتواء التهديدات واستعادة العمليات وتعزيز المرونة.',
+    bulletPoints: [
+      '24/7 ransomware incident response',
+      'Threat containment and forensic analysis',
+      'Ransomware decryption support',
+      'Post-incident hardening and playbooks',
+    ],
+    bulletPointsAr: [
+      'استجابة على مدار الساعة لحوادث الفدية',
+      'احتواء التهديد والتحليل الجنائي',
+      'دعم فك تشفير الفدية البرمجية',
+      'تصلّب ما بعد الحادث وخطط الاستجابة',
+    ],
+    services: [
+      {
+        id: 'svc-ransomware-ir',
+        title: 'Ransomware Incident Response',
+        titleAr: 'الاستجابة لحوادث الفدية البرمجية',
+        slug: 'ransomware-incident-response',
+        icon: 'AlertTriangle',
+        shortDescription:
+          'Emergency response to contain ransomware attacks, preserve evidence, and coordinate recovery.',
+        shortDescriptionAr:
+          'استجابة طارئة لاحتواء هجمات الفدية والحفاظ على الأدلة وتنسيق الاستعادة.',
+        paragraphs: [
+          'When ransomware strikes, every minute counts. Our incident response team helps isolate affected systems, assess scope, and coordinate containment with your IT and leadership teams.',
+          'We support forensic analysis, communication planning, and recovery coordination aligned with regulatory notification requirements.',
+        ],
+      },
+      {
+        id: 'svc-ransomware-decrypt',
+        title: 'Ransomware Decryption Support',
+        titleAr: 'دعم فك تشفير الفدية البرمجية',
+        slug: 'ransomware-decryption-support',
+        icon: 'Key',
+        shortDescription:
+          'Technical support to evaluate decryption options and restore encrypted data where possible.',
+        shortDescriptionAr:
+          'دعم فني لتقييم خيارات فك التشفير واستعادة البيانات المشفرة حيثما أمكن.',
+        paragraphs: [
+          'Our specialists assess ransomware variants, evaluate available decryption methods, and support data recovery efforts without encouraging ransom payment.',
+          'We work alongside your team to restore critical systems and implement controls to prevent reinfection.',
+        ],
+      },
+      {
+        id: 'svc-dark-web-monitoring',
+        title: 'Dark Web Monitoring',
+        titleAr: 'مراقبة الويب المظلم',
+        slug: 'dark-web-monitoring',
+        icon: 'Eye',
+        shortDescription:
+          'Continuous surveillance of dark web marketplaces and criminal forums to detect leaked credentials and exposed data targeting your organization.',
+        shortDescriptionAr:
+          'مراقبة مستمرة لأسواق الويب المظلم والمنتديات الإجرامية لاكتشاف بيانات الاعتماد المسربة والبيانات المعرّضة التي تستهدف مؤسستك.',
+        paragraphs: [
+          'Stolen credentials, leaked databases, and insider chatter are traded across dark web marketplaces every day. We monitor these hidden channels around the clock and alert you when your organization is mentioned.',
+          'Our analysts track corporate emails, passwords, customer records, and intellectual property offered for sale — so you can respond before a breach escalates.',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'assessments',
+    name: 'Security Assessments',
+    nameAr: 'التقييمات الأمنية',
+    tagline: 'CLOUD • AD • INFRASTRUCTURE',
+    taglineAr: 'سحابة • AD • بنية تحتية',
+    divisionSlug: 'security-assessments',
+    description:
+      'Targeted security assessments across cloud, Active Directory, servers, firewalls, endpoints, email, storage, databases, VPN, wireless, and IAM.',
+    descriptionAr:
+      'تقييمات أمنية مستهدفة للسحابة وActive Directory والخوادم والجدران النارية ونقاط النهاية والبريد والتخزين وقواعد البيانات وVPN واللاسلكي وIAM.',
+    bulletPoints: [
+      'Cloud and Active Directory assessments',
+      'Infrastructure and endpoint security reviews',
+      'Email, database, and VPN testing',
+      'Wireless and IAM security evaluations',
+    ],
+    bulletPointsAr: [
+      'تقييم السحابة وActive Directory',
+      'مراجعات البنية التحتية ونقاط النهاية',
+      'اختبار البريد وقواعد البيانات وVPN',
+      'تقييم اللاسلكي وIAM',
+    ],
+    services: [
+      {
+        id: 'svc-cloud',
+        title: 'Cloud Security Assessment',
+        titleAr: 'تقييم أمن السحابة',
+        slug: 'cloud-security-assessment',
+        icon: 'Cloud',
+        shortDescription:
+          'Security review of AWS, Azure, and GCP environments including IAM, storage, and network exposure.',
+        shortDescriptionAr:
+          'مراجعة أمنية لبيئات AWS وAzure وGCP بما في ذلك IAM والتخزين والتعرض الشبكي.',
+        paragraphs: [
+          'Cloud misconfigurations are a leading breach vector. We assess identity policies, storage permissions, network exposure, and logging across your cloud estate.',
+          'Deliverables align with CIS benchmarks and provider-specific security best practices.',
+        ],
+      },
+      {
+        id: 'svc-ad',
+        title: 'Active Directory (AD) Security Assessment',
+        titleAr: 'تقييم أمن Active Directory (AD)',
+        slug: 'active-directory-security-assessment',
+        icon: 'Users',
+        shortDescription:
+          'Assessment of AD hygiene, privilege escalation paths, and domain security posture.',
+        shortDescriptionAr:
+          'تقييم نظافة AD ومسارات تصعيد الامتيازات ووضع أمن النطاق.',
+        paragraphs: [
+          'Active Directory is the backbone of enterprise identity. We identify misconfigurations, excessive privileges, Kerberoasting risks, and lateral movement paths.',
+          'Recommendations focus on hardening domain controllers, group policies, and privileged access management.',
+        ],
+      },
+      {
+        id: 'svc-server',
+        title: 'Server Security Assessment',
+        titleAr: 'تقييم أمن الخوادم',
+        slug: 'server-security-assessment',
+        icon: 'Server',
+        shortDescription:
+          'Hardening review and vulnerability assessment of Windows and Linux server environments.',
+        shortDescriptionAr:
+          'مراجعة التصلّب وتقييم الثغرات لبيئات خوادم Windows وLinux.',
+        paragraphs: [
+          'Server assessments cover patch levels, service exposure, local security policies, and privileged account usage.',
+          'We provide benchmark-aligned hardening guidance for production and DMZ server tiers.',
+        ],
+      },
+      {
+        id: 'svc-firewall',
+        title: 'Firewall Security Assessment',
+        titleAr: 'تقييم أمن الجدار الناري',
+        slug: 'firewall-security-assessment',
+        icon: 'Shield',
+        shortDescription:
+          'Rule base review, segmentation validation, and configuration assessment of perimeter and internal firewalls.',
+        shortDescriptionAr:
+          'مراجعة قواعد الجدار والتحقق من التجزئة وتقييم تكوين الجدران المحيطية والداخلية.',
+        paragraphs: [
+          'Firewall rule sprawl and misconfigurations create unintended access paths. We analyze rule bases for overly permissive policies and shadow rules.',
+          'Assessments validate network segmentation effectiveness and compliance with security architecture standards.',
+        ],
+      },
+      {
+        id: 'svc-endpoint',
+        title: 'Endpoint Protection Security Assessment (EPS/EDR)',
+        titleAr: 'تقييم أمن حماية نقاط النهاية (EPS/EDR)',
+        slug: 'endpoint-protection-security-assessment',
+        icon: 'Monitor',
+        shortDescription:
+          'Evaluation of endpoint protection platform deployment, detection coverage, and response capabilities.',
+        shortDescriptionAr:
+          'تقييم نشر منصة حماية نقاط النهاية وتغطية الاكتشاف وقدرات الاستجابة.',
+        paragraphs: [
+          'EDR and EPS solutions are only effective when properly deployed and tuned. We assess agent coverage, policy configuration, and detection efficacy.',
+          'Testing includes simulated attack techniques to validate alert generation and response workflows.',
+        ],
+      },
+      {
+        id: 'svc-email',
+        title: 'Email Server Security Assessment',
+        titleAr: 'تقييم أمن خادم البريد',
+        slug: 'email-server-security-assessment',
+        icon: 'Mail',
+        shortDescription:
+          'Security review of email infrastructure including relay configuration, authentication, and anti-phishing controls.',
+        shortDescriptionAr:
+          'مراجعة أمنية للبنية التحتية للبريد بما في ذلك الترحيل والمصادقة ومكافحة التصيد.',
+        paragraphs: [
+          'Email remains the top initial access vector. We assess SPF/DKIM/DMARC configuration, open relay risks, and mail gateway security.',
+          'Recommendations strengthen protection against phishing, spoofing, and business email compromise.',
+        ],
+      },
+      {
+        id: 'svc-nas',
+        title: 'NAS Storage Security Assessment',
+        titleAr: 'تقييم أمن تخزين NAS',
+        slug: 'nas-storage-security-assessment',
+        icon: 'HardDrive',
+        shortDescription:
+          'Security assessment of network-attached storage systems, shares, and access permissions.',
+        shortDescriptionAr:
+          'تقييم أمن أنظمة التخزين المتصلة بالشبكة والمشاركات وصلاحيات الوصول.',
+        paragraphs: [
+          'NAS devices often hold sensitive data with weak access controls. We review share permissions, authentication, encryption, and exposure to ransomware.',
+          'Hardening guidance covers access policies, backup integration, and network isolation.',
+        ],
+      },
+      {
+        id: 'svc-database',
+        title: 'Database Security Assessment',
+        titleAr: 'تقييم أمن قواعد البيانات',
+        slug: 'database-security-assessment',
+        icon: 'Database',
+        shortDescription:
+          'Assessment of database configurations, access controls, encryption, and SQL injection resistance.',
+        shortDescriptionAr:
+          'تقييم تكوينات قواعد البيانات وضوابط الوصول والتشفير ومقاومة حقن SQL.',
+        paragraphs: [
+          'Databases store an organization\'s most critical assets. We assess privileged access, encryption at rest and in transit, and application-layer exposure.',
+          'Testing includes configuration review and targeted injection testing where appropriate.',
+        ],
+      },
+      {
+        id: 'svc-vpn',
+        title: 'VPN Security Assessment',
+        titleAr: 'تقييم أمن VPN',
+        slug: 'vpn-security-assessment',
+        icon: 'Lock',
+        shortDescription:
+          'Security review of VPN gateways, remote access policies, and split-tunneling configurations.',
+        shortDescriptionAr:
+          'مراجعة أمنية لبوابات VPN وسياسات الوصول عن بُعد وتكوينات الانقسام.',
+        paragraphs: [
+          'VPN infrastructure provides remote access but can become an entry point if misconfigured. We assess authentication strength, encryption settings, and endpoint posture checks.',
+          'Recommendations align with zero-trust remote access principles.',
+        ],
+      },
+      {
+        id: 'svc-wireless',
+        title: 'Wireless Infrastructure Assessment',
+        titleAr: 'تقييم البنية التحتية اللاسلكية',
+        slug: 'wireless-infrastructure-assessment',
+        icon: 'Wifi',
+        shortDescription:
+          'Wireless network security testing including encryption, rogue AP detection, and guest network isolation.',
+        shortDescriptionAr:
+          'اختبار أمن الشبكات اللاسلكية بما في ذلك التشفير وكشف نقاط الوصول المزيفة وعزل الشبكة الضيف.',
+        paragraphs: [
+          'Wireless networks extend your attack surface beyond physical boundaries. We test WPA configuration, rogue access points, and VLAN segmentation for guest networks.',
+          'Assessments cover both corporate and industrial wireless deployments.',
+        ],
+      },
+      {
+        id: 'svc-iam',
+        title: 'Identity & Access Management Assessment',
+        titleAr: 'تقييم إدارة الهوية والوصول',
+        slug: 'identity-access-management-assessment',
+        icon: 'UserCheck',
+        shortDescription:
+          'Review of IAM policies, MFA deployment, privileged access, and identity lifecycle management.',
+        shortDescriptionAr:
+          'مراجعة سياسات IAM ونشر MFA والوصول المميز وإدارة دورة حياة الهوية.',
+        paragraphs: [
+          'Identity is the new perimeter. We assess MFA coverage, role-based access controls, orphaned accounts, and privileged access management practices.',
+          'Deliverables include a roadmap to strengthen identity governance and reduce account takeover risk.',
+        ],
+      },
+      {
+        id: 'svc-architecture',
+        title: 'Secure Architecture Review',
+        titleAr: 'مراجعة الهندسة المعمارية الآمنة',
+        slug: 'secure-architecture-review',
+        icon: 'Layout',
+        shortDescription:
+          'Design-level security review of applications, networks, and cloud architectures before and after deployment.',
+        shortDescriptionAr:
+          'مراجعة أمنية على مستوى التصميم للتطبيقات والشبكات والهندسة السحابية قبل وبعد النشر.',
+        paragraphs: [
+          'Security architecture reviews identify design flaws early — when they are cheapest to fix. We assess trust boundaries, data flows, and control placement.',
+          'Engagements support new platform designs, mergers, and cloud migration programs.',
+        ],
+      },
+      {
+        id: 'svc-managed',
+        title: 'IT Security Managed Services',
+        titleAr: 'خدمات الأمن السيبراني المُدارة',
+        slug: 'it-security-managed-services',
+        icon: 'ShieldCheck',
+        shortDescription:
+          'Ongoing managed security services including monitoring, vulnerability management, and security operations support.',
+        shortDescriptionAr:
+          'خدمات أمن سيبراني مُدارة تشمل المراقبة وإدارة الثغرات ودعم عمليات الأمن.',
+        paragraphs: [
+          'IT Security Managed Services provide continuous protection through proactive monitoring, patch management, and security operations center support.',
+          'We act as an extension of your team to maintain security posture, respond to alerts, and drive ongoing improvement.',
+        ],
+      },
+    ],
+  },
+]
+
+const IMAGE_POOL = [
+  PROFILE_IMAGES.expertise,
+  PROFILE_IMAGES.feed,
+  PROFILE_IMAGES.designManagement,
+  PROFILE_IMAGES.procurement,
+  PROFILE_IMAGES.programManagement,
+  PROFILE_IMAGES.construction,
+  PROFILE_IMAGES.commissioning,
+  PROFILE_IMAGES.operations,
+  PROFILE_IMAGES.optimization,
+  PROFILE_IMAGES.pmc,
+  PROFILE_IMAGES.industries,
+]
+
+export function buildSeedDivisions(): Division[] {
+  return SERVICE_CATEGORIES.map((cat, index) => ({
+    _id: `div-${cat.id}`,
+    _type: 'division' as const,
+    name: cat.name,
+    slug: { _type: 'slug' as const, current: cat.divisionSlug },
+    type: 'it' as const,
+    tagLabel: cat.tagline,
+    description: cat.description,
+    bulletPoints: cat.bulletPoints,
+    order: index + 1,
+  }))
+}
+
+export function buildSeedServices(): Service[] {
+  let order = 1
+  const services: Service[] = []
+
+  for (const cat of SERVICE_CATEGORIES) {
+    for (const svc of cat.services) {
+      services.push({
+        _id: svc.id,
+        _type: 'service',
+        title: svc.title,
+        slug: { _type: 'slug', current: svc.slug },
+        icon: svc.icon,
+        shortDescription: svc.shortDescription,
+        fullDescription: blocks(...svc.paragraphs),
+        order: order++,
+      })
+    }
+  }
+
+  return services
+}
+
+export function buildServiceImageMap(): Record<string, string> {
+  const map: Record<string, string> = {}
+  let i = 0
+  for (const cat of SERVICE_CATEGORIES) {
+    for (const svc of cat.services) {
+      map[svc.slug] = IMAGE_POOL[i % IMAGE_POOL.length]
+      i++
+    }
+  }
+  return map
+}
+
+export function buildServiceMenu(locale: 'en' | 'ar' = 'en') {
+  return buildMegaMenuCategories(locale)
+}
+
+export interface MegaMenuLink {
+  label: string
+  labelAr: string
+  href: string
+}
+
+export interface MegaMenuCategory {
+  id: string
+  title: string
+  titleAr: string
+  links: MegaMenuLink[]
+}
+
+/** Featured links shown in the navbar mega menu (matches reliablecompany.sa layout). */
+export const MEGA_MENU_CATEGORIES: MegaMenuCategory[] = [
+  {
+    id: 'offensive',
+    title: 'Offensive Security',
+    titleAr: 'الأمن الهجومي',
+    links: [
+      {
+        label: 'Network Penetration Testing',
+        labelAr: 'اختبار اختراق الشبكات',
+        href: '/services/network-penetration-testing',
+      },
+      {
+        label: 'Web Application Penetration Testing',
+        labelAr: 'اختبار اختراق تطبيقات الويب',
+        href: '/services/web-application-penetration-testing',
+      },
+      {
+        label: 'Mobile Application Security Testing',
+        labelAr: 'اختبار أمان تطبيقات الجوال',
+        href: '/services/mobile-application-security-testing',
+      },
+      {
+        label: 'API Security Testing',
+        labelAr: 'اختبار أمان واجهات API',
+        href: '/services/api-security-testing',
+      },
+      {
+        label: 'OT / IIoT & SCADA VAPT',
+        labelAr: 'VAPT لأنظمة OT / IIoT و SCADA',
+        href: '/services/ot-security-testing',
+      },
+    ],
+  },
+  {
+    id: 'grc',
+    title: 'Compliance & GRC',
+    titleAr: 'الامتثال والحوكمة',
+    links: [
+      {
+        label: 'ISO 27001 Audits',
+        labelAr: 'تدقيق ISO 27001',
+        href: '/services/isms-audits',
+      },
+      {
+        label: 'ISO 27001 Gap Assessment',
+        labelAr: 'تقييم فجوات ISO 27001',
+        href: '/services/gap-assessment',
+      },
+    ],
+  },
+  {
+    id: 'incident',
+    title: 'Incident Response & Resilience',
+    titleAr: 'الاستجابة للحوادث والمرونة',
+    links: [
+      {
+        label: 'Ransomware Incident Response & Decryption',
+        labelAr: 'الاستجابة لفدية البرمجيات وفك التشفير',
+        href: '/services/ransomware-incident-response',
+      },
+      {
+        label: 'Dark Web Monitoring',
+        labelAr: 'مراقبة الويب المظلم',
+        href: '/services/dark-web-monitoring',
+      },
+    ],
+  },
+  {
+    id: 'assessments',
+    title: 'Security Assessment',
+    titleAr: 'التقييم الأمني',
+    links: [
+      {
+        label: 'IT Security Managed Services',
+        labelAr: 'خدمات الأمن السيبراني المُدارة',
+        href: '/services/it-security-managed-services',
+      },
+    ],
+  },
+]
+
+export function buildMegaMenuCategories(locale: 'en' | 'ar' = 'en') {
+  const isAr = locale === 'ar'
+  return MEGA_MENU_CATEGORIES.map((cat) => ({
+    title: isAr ? cat.titleAr : cat.title,
+    href: '/services',
+    links: cat.links.map((link) => ({
+      label: isAr ? link.labelAr : link.label,
+      href: link.href,
+    })),
+  }))
+}
+
+export const CONTACT_SERVICE_OPTIONS = [
+  { key: 'offensive', label: 'Offensive Security', labelAr: 'الأمن الهجومي' },
+  { key: 'grc', label: 'GRC & Compliance', labelAr: 'الحوكمة والمخاطر والامتثال' },
+  { key: 'incident', label: 'Incident Response & Resilience', labelAr: 'الاستجابة للحوادث والمرونة' },
+  { key: 'assessments', label: 'Security Assessments', labelAr: 'التقييمات الأمنية' },
+  { key: 'other', label: 'Other', labelAr: 'أخرى' },
+] as const
+
+export type ContactServiceKey = (typeof CONTACT_SERVICE_OPTIONS)[number]['key']
+
+export function getCategoryForSlug(slug: string): ServiceCategoryName | undefined {
+  for (const cat of SERVICE_CATEGORIES) {
+    if (cat.services.some((s) => s.slug === slug)) return cat.name
+  }
+  return undefined
+}
+
+export function getServiceTitleAr(slug: string): string | undefined {
+  for (const cat of SERVICE_CATEGORIES) {
+    const svc = cat.services.find((s) => s.slug === slug)
+    if (svc) return svc.titleAr
+  }
+  return undefined
+}
+
+export function getServiceShortAr(slug: string): string | undefined {
+  for (const cat of SERVICE_CATEGORIES) {
+    const svc = cat.services.find((s) => s.slug === slug)
+    if (svc) return svc.shortDescriptionAr
+  }
+  return undefined
+}
+
+export const SERVICE_TITLE_AR: Record<string, string> = Object.fromEntries(
+  SERVICE_CATEGORIES.flatMap((cat) =>
+    cat.services.map((s) => [s.slug, s.titleAr]),
+  ),
+)
+
+export const SERVICE_SHORT_AR: Record<string, string> = Object.fromEntries(
+  SERVICE_CATEGORIES.flatMap((cat) =>
+    cat.services.map((s) => [s.slug, s.shortDescriptionAr]),
+  ),
+)
+
+export const DIVISION_AR: Record<
+  string,
+  { name: string; tagLabel: string; description: string; bulletPoints: string[] }
+> = Object.fromEntries(
+  SERVICE_CATEGORIES.map((cat) => [
+    cat.name,
+    {
+      name: cat.nameAr,
+      tagLabel: cat.taglineAr,
+      description: cat.descriptionAr,
+      bulletPoints: cat.bulletPointsAr,
+    },
+  ]),
+)

@@ -1,11 +1,11 @@
 import { CheckCircle2, ChevronRight } from 'lucide-react'
-import Image from 'next/image'
 
 import ServiceFaqAccordion from '@/components/sections/ServiceFaqAccordion'
 import ServiceKeyBenefitsSection, {
   ServiceBenefitsGrid,
   ServiceProcessGrid,
 } from '@/components/sections/ServiceKeyBenefitsSection'
+import CmsImage from '@/components/ui/CmsImage'
 import SectionHeader from '@/components/ui/SectionHeader'
 import SectionLabel from '@/components/ui/SectionLabel'
 import PortableTextContent from '@/components/ui/PortableTextContent'
@@ -13,7 +13,7 @@ import type { Service } from '@/lib/types'
 
 interface ServiceDetailContentProps {
   service: Service
-  heroImage?: string
+  overviewImage?: string
   labels: {
     services: string
     serviceContent: string
@@ -74,7 +74,7 @@ function TitleWithBlueHighlight({ title, highlight }: { title: string; highlight
 
 export default function ServiceDetailContent({
   service,
-  heroImage,
+  overviewImage,
   labels,
   locale = 'en',
 }: ServiceDetailContentProps & { locale?: 'en' | 'ar' }) {
@@ -186,10 +186,10 @@ export default function ServiceDetailContent({
                 )}
               </div>
 
-              {heroImage ? (
+              {overviewImage ? (
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-[0_8px_40px_rgba(26,79,160,0.18)] lg:aspect-auto lg:min-h-[480px]">
-                  <Image
-                    src={heroImage}
+                  <CmsImage
+                    src={overviewImage}
                     alt=""
                     fill
                     className="object-cover"

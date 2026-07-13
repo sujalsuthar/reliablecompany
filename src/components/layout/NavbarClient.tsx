@@ -13,6 +13,7 @@ import ServicesMegaMenu, {
   ServicesMobileLinks,
 } from '@/components/layout/ServicesMegaMenu'
 import { useLocale } from '@/components/providers/LocaleProvider'
+import { useNavOverlay } from '@/components/providers/NavOverlayProvider'
 import Button from '@/components/ui/Button'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
 import { DEFAULT_MEGA_MENU_IMAGE } from '@/lib/page-heroes'
@@ -52,6 +53,7 @@ export default function NavbarClient({
   const mainLinks = nav.mainLinks ?? []
   const quoteHref = nav.consultationLink || '/contact'
   const { messages } = useLocale()
+  const { setServicesMenuOpen, setMobileNavOpen } = useNavOverlay()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
@@ -71,6 +73,14 @@ export default function NavbarClient({
       document.body.style.overflow = ''
     }
   }, [isOpen])
+
+  useEffect(() => {
+    setServicesMenuOpen(servicesOpen)
+  }, [servicesOpen, setServicesMenuOpen])
+
+  useEffect(() => {
+    setMobileNavOpen(isOpen)
+  }, [isOpen, setMobileNavOpen])
 
   useEffect(() => {
     setServicesOpen(false)

@@ -5,6 +5,7 @@
 
 export type SectionType =
   | 'hero'
+  | 'campaigns'
   | 'services'
   | 'whyUs'
   | 'industries'
@@ -20,6 +21,7 @@ export type SectionType =
   | 'team'
   | 'pricing'
   | 'blog'
+  | 'certifications'
 
 export type FieldType = 'text' | 'richtext' | 'image' | 'button'
 
@@ -85,6 +87,7 @@ export interface GlobalContent {
   addressAr?: string
   linkedIn: string
   twitter: string
+  facebook: string
   copyrightText: string
   copyrightTextAr?: string
   logoUrl: string

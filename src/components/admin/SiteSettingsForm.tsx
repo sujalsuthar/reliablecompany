@@ -24,6 +24,7 @@ export default function SiteSettingsForm() {
           address: data.address ?? '',
           linkedIn: data.linkedIn ?? '',
           twitter: data.twitter ?? '',
+          facebook: data.facebook ?? '',
         })
       })
       .finally(() => setIsLoading(false))
@@ -58,6 +59,7 @@ export default function SiteSettingsForm() {
           ['email', 'Email'],
           ['linkedIn', 'LinkedIn URL'],
           ['twitter', 'Twitter URL'],
+          ['facebook', 'Facebook URL'],
         ].map(([key, label]) => (
           <div key={key}>
             <label className="mb-1.5 block text-sm font-medium text-gray-700">{label}</label>

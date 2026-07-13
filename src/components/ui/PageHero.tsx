@@ -1,8 +1,9 @@
-import { clsx } from 'clsx'
 import { ChevronRight, ShieldCheck } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
+import { clsx } from 'clsx'
+
+import CmsImage from '@/components/ui/CmsImage'
 
 export interface BreadcrumbItem {
   label: string
@@ -34,7 +35,7 @@ export default function PageHero({
       )}
     >
       {imageUrl && (
-        <Image
+        <CmsImage
           src={imageUrl}
           alt=""
           fill

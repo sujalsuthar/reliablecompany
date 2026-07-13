@@ -335,7 +335,14 @@ export function localizePage(page: Page, locale: Locale): Page {
     ...page,
     title: pickLocalized(
       page.title,
-      page.titleAr ?? (page.slug?.current === 'about' ? ABOUT_PAGE_AR.title : undefined),
+      page.titleAr ??
+        (page.slug?.current === 'about'
+          ? ABOUT_PAGE_AR.title
+          : page.slug?.current === 'privacy'
+            ? 'سياسة الخصوصية'
+            : page.slug?.current === 'terms'
+              ? 'شروط الخدمة'
+              : undefined),
       locale,
     ),
     seoTitle: pickLocalized(page.seoTitle, page.seoTitleAr, locale),

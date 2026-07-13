@@ -1,11 +1,11 @@
-import { put } from '@vercel/blob'
 import { promises as fs } from 'fs'
 import path from 'path'
 
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAdminSession } from '@/lib/cms/api-auth'
-import { isBlobEnabled } from '@/lib/cms/storage'
+import { filePublicUrl, saveFileToMongo } from '@/lib/cms/file-storage'
+import { isMongoEnabled } from '@/lib/cms/storage'
 import { validateImageUpload } from '@/lib/security/upload'
 
 export async function POST(request: NextRequest) {
@@ -32,12 +32,19 @@ export async function POST(request: NextRequest) {
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 80)
     const filename = `${Date.now()}-${safeName}.${ext}`
 
-    if (isBlobEnabled()) {
-      const blob = await put(`uploads/${filename}`, buffer, {
-        access: 'public',
-        contentType: validation.mime,
-      })
-      return NextResponse.json({ url: blob.url })
+    if (process.env.VERCEL && !isMongoEnabled()) {
+      return NextResponse.json(
+        {
+          error:
+            'Image storage is not configured. Set MONGODB_URI in your environment variables.',
+        },
+        { status: 503 },
+      )
+    }
+
+    if (isMongoEnabled()) {
+      const fileId = await saveFileToMongo(buffer, filename, validation.mime, 'upload')
+      return NextResponse.json({ url: filePublicUrl(fileId, 'upload') })
     }
 
     const uploadDir = path.join(process.cwd(), 'public', 'uploads')
@@ -45,7 +52,9 @@ export async function POST(request: NextRequest) {
     await fs.writeFile(path.join(uploadDir, filename), buffer)
 
     return NextResponse.json({ url: `/uploads/${filename}` })
-  } catch {
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+  } catch (error) {
+    console.error('[cms] upload failed:', error)
+    const message = error instanceof Error ? error.message : 'Upload failed'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

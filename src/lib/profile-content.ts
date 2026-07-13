@@ -16,11 +16,11 @@ export const PROFILE_IMAGES = {
   contact: '/profile/page-26-img-1.jpeg',
 } as const
 
-export const PROFILE_TAGLINE = 'Collaborate, Communicate, Complete.'
-export const PROFILE_SUBTITLE = 'Project Management & Engineering'
+export const PROFILE_TAGLINE = 'Professional Cyber Security & Penetration Testing'
+export const PROFILE_SUBTITLE = 'Cyber Security & VAPT'
 
-export const PROFILE_ABOUT = `Reliable Company is a specialized, integrated Project Management consultancy and Engineering services group. As a group of companies, we started our operations in 2016 from UAE and in 2023 we expanded our business in the Kingdom of Saudi Arabia.
+export const PROFILE_ABOUT = `Reliable Company is a specialized cybersecurity services group providing Vulnerability Assessment and Penetration Testing (VAPT), web application security testing, network security assessment, and cybersecurity consulting across Saudi Arabia. As a group of companies, we started our operations in 2016 from UAE and in 2023 we expanded our business in the Kingdom of Saudi Arabia.
 
-Our management team has 100+ years of combined experience in managing 500+ projects in Desalination, Oil & Gas, Water Infrastructure networking, FEED, Construction and many more from concept till final handover. Passion for Quality & service, Innovative thinking and hands-on experience are the qualities of our team which makes them unique to deliver many challenging projects on-time within budget with compliance.
+Our management team has 100+ years of combined experience securing industrial and enterprise environments across Desalination, Oil & Gas, Water Infrastructure, Manufacturing, and critical infrastructure sectors. Passion for quality, innovative security methodologies, and hands-on testing experience are the qualities that make our team unique in delivering real-world protection.
 
-Our certified Project Managers and Engineers, Technical experts & skilled designers are committed to act as an owner's engineers/consultants, to optimize resources & equipments to deliver project On-time. Time is Money and we don't allow contractors to lose Seconds.`
+Our certified security professionals are committed to identifying vulnerabilities before attackers do — protecting applications, networks, cloud environments, and industrial systems with rigorous testing and actionable remediation guidance.`

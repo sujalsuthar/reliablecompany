@@ -1,4 +1,5 @@
 import type { Locale } from '@/lib/i18n/config'
+import { buildServiceMenu, CONTACT_SERVICE_OPTIONS } from '@/lib/service-catalog'
 
 export type Messages = typeof en
 
@@ -11,30 +12,41 @@ const en = {
     openMenu: 'Open menu',
     closeMenu: 'Close menu',
     viewAllServices: 'View all services',
-    megaTitle: 'PROJECT MANAGEMENT & ENGINEERING',
+    megaTitle: 'CYBER SECURITY',
     megaEyebrow: 'Reliable Company',
-    megaTagline: 'PMC • ENGINEERING • DELIVERY',
+    megaTagline: 'DATA SAFETY • PRIVACY • PROTECTION • ENCRYPTION',
   },
   footer: {
     services: 'Services',
     company: 'Company',
     offices: 'Offices',
     contact: 'Contact',
+    legalNotice:
+      'Registered in the Kingdom of Saudi Arabia. Personal data processed in accordance with the Saudi Personal Data Protection Law (PDPL).',
+  },
+  legal: {
+    pdplConsent:
+      'I agree to the collection and processing of my personal data in accordance with the',
+    privacyLink: 'Privacy Policy',
+    pdplSuffix: 'and the Saudi Personal Data Protection Law (PDPL).',
+    consentRequired: 'You must agree to data processing to continue.',
   },
   cookie: {
-    text: 'We use cookies to improve your experience. Please review our',
+    text: 'We use essential cookies for language preference and site functionality, in accordance with the Saudi Personal Data Protection Law (PDPL). Please review our',
     privacy: 'Privacy Policy',
-    and: 'and Cookie Policy.',
+    and: 'and',
+    terms: 'Terms of Service',
     accept: 'Accept',
+    reject: 'Reject',
   },
   contact: {
     title: 'Contact Us',
     description:
-      'Reach out to discuss your next engineering project. Our team is ready to help.',
+      'Reach out to discuss your cybersecurity needs. Our team is ready to help.',
     home: 'Home',
-    heading: "Let's Build Something Great",
+    heading: 'Secure Your Business',
     subheading:
-      'Share your project requirements and our engineering team will respond within one business day.',
+      'Share your security requirements and our cybersecurity team will respond within one business day.',
     officesTitle: 'Our Offices',
     officesIntro:
       'Visit one of our offices across the Kingdom or send us a message — we typically respond within one business day.',
@@ -74,17 +86,14 @@ const en = {
         Khobar: 'Khobar',
         Other: 'Other',
       },
-      services: {
-        feed: 'Front-End Engineering (FEED)',
-        pmc: 'Project Management Consultancy',
-        design: 'Design Management',
-        procurement: 'Procurement Management',
-        program: 'Program Management',
-        construction: 'Construction Management',
-        commissioning: 'Commissioning Management',
-        operations: 'Operations & Maintenance',
-        optimization: 'Plant Optimization',
-        other: 'Other',
+      services: Object.fromEntries(
+        CONTACT_SERVICE_OPTIONS.map((opt) => [opt.key, opt.label]),
+      ) as {
+        offensive: string
+        grc: string
+        incident: string
+        assessments: string
+        other: string
       },
       submit: 'Send Message',
       sending: 'Sending...',
@@ -98,19 +107,20 @@ const en = {
         city: 'Please select a city.',
         service: 'Please select a service.',
         messageRequired: 'Message is required.',
-        messageShort: 'Message must be at least 10 characters.',
-      },
+      messageShort: 'Message must be at least 10 characters.',
+      consent: 'You must agree to data processing.',
     },
+  },
   },
   pages: {
     about: {
       title: 'About Us',
-      description: 'Learn about Reliable Company — project management and engineering.',
+      description: 'Learn about Reliable Company — cybersecurity and VAPT specialists.',
       home: 'Home',
     },
     blog: {
       title: 'Blog',
-      description: 'Engineering insights and company updates.',
+      description: 'Cybersecurity insights and company updates.',
       home: 'Home',
       readMore: 'Read more',
     },
@@ -122,12 +132,12 @@ const en = {
     },
     projects: {
       title: 'Projects',
-      description: 'Explore our portfolio of engineering projects.',
+      description: 'Explore our portfolio of cybersecurity case studies.',
       home: 'Home',
     },
     services: {
       title: 'Services',
-      description: 'Integrated PMC and engineering services.',
+      description: 'Professional VAPT and cybersecurity consulting services.',
       home: 'Home',
     },
     divisions: {
@@ -160,13 +170,13 @@ const en = {
   aboutPage: {
     heroTitle: 'Who We Are',
     heroDescription:
-      'A specialized integrated Project Management consultancy and Engineering services group operating across the UAE and Saudi Arabia since 2016.',
+      'A specialized cybersecurity services group providing VAPT, web application security testing, and consulting across Saudi Arabia since 2016.',
     team: 'Our Team',
     values: 'Our Values',
     certifications: 'Certifications & Qualifications',
     imageAlt: 'Reliable Company projects and expertise',
     fallback:
-      'Reliable Company is your trusted partner for project management and engineering across industrial and infrastructure sectors in Saudi Arabia.',
+      'Reliable Company is your trusted partner for cybersecurity and VAPT across industrial and enterprise sectors in Saudi Arabia.',
   },
   sections: {
     viewAllServices: 'View all services',
@@ -176,13 +186,13 @@ const en = {
   servicePage: {
     heroTitle: 'Our Expertise',
     heroDescription:
-      'Integrated Project Management consultancy and Engineering services — from FEED and design management through construction, commissioning, operations, and optimization.',
+      'Offensive Security, GRC & Compliance, Incident Response, and Security Assessments — comprehensive cybersecurity services across Saudi Arabia.',
     empty: 'Services will appear here once added in the CMS.',
   },
   serviceDetail: {
-    ctaTitle: 'Ready to start your project?',
+    ctaTitle: 'Ready to secure your environment?',
     ctaDescription:
-      'Speak with our engineering team about how we can support your next project.',
+      'Speak with our cybersecurity team about protecting your applications and infrastructure.',
     ctaButton: 'Request a Consultation',
     viewAllServices: 'View All Services',
     related: 'Related Services',
@@ -200,7 +210,7 @@ const en = {
   projectPage: {
     heroTitle: 'Our Projects',
     heroDescription:
-      'A portfolio of project management and engineering projects delivered across desalination, oil & gas, water infrastructure, and industrial sectors.',
+      'A portfolio of cybersecurity and VAPT engagements across financial, oil & gas, and enterprise sectors.',
     empty: 'Projects will appear here once added in the CMS.',
     noResults: 'No projects found',
     noResultsHint: 'Try adjusting your filters or search query.',
@@ -215,21 +225,63 @@ const en = {
   divisionsPage: {
     heroTitle: 'Our Core Capabilities',
     heroDescription:
-      'Project Management Consultancy and Engineering Services — two integrated pillars for seamless project delivery.',
-    expertise: 'Multidisciplinary expertise',
-    expertiseDesc: 'Integrated teams across PMC and engineering for complex industrial projects.',
+      'VAPT & Penetration Testing and Cybersecurity Consulting — two integrated pillars for comprehensive security.',
+    expertise: 'Four core cybersecurity pillars',
+    expertiseDesc: 'Offensive Security, GRC, Incident Response, and Security Assessments under one team.',
   },
   blogPage: {
     heroTitle: 'Blog',
-    heroDescription: 'Insights and updates from our engineering teams across Saudi Arabia.',
+    heroDescription: 'Insights and updates from our cybersecurity teams across Saudi Arabia.',
     empty: 'No blog posts published yet.',
   },
   careersPage: {
     heroTitle: 'Careers',
     heroDescription:
-      'Build your career with Reliable Company — project management and engineering teams delivering projects across the Kingdom.',
+      'Build your career with Reliable Company — cybersecurity and penetration testing teams across the Kingdom.',
     empty: 'No open positions at the moment. Check back soon.',
     apply: 'Apply now',
+  },
+  careerApply: {
+    submitFor: 'Submit your application for',
+    responsibilities: 'Key responsibilities',
+    timeline: 'Timeline',
+    timelineHint: 'Quick review after submission',
+    emailLabel: 'Email',
+    locationLabel: 'Location',
+    formLabel: 'Application form',
+    formTitle: 'Fill in your details and share your CV',
+    fullName: 'Full name',
+    fullNamePlaceholder: 'Enter your full name',
+    email: 'Email',
+    emailPlaceholder: 'your.email@example.com',
+    phone: 'Phone',
+    phonePlaceholder: '+966 XX XXX XXXX',
+    city: 'City',
+    cityPlaceholder: 'Current city',
+    coverLetter: 'Cover letter',
+    coverLetterPlaceholder: 'Tell us why you are the right fit for this opportunity',
+    resume: 'Upload CV / Resume',
+    resumeHint: 'Choose PDF, DOC, or DOCX file',
+    resumeTypes: 'PDF, DOC, or DOCX only — max 10 MB',
+    browse: 'Browse',
+    consent:
+      'I agree to the storage and processing of my data for hiring purposes in accordance with the Privacy Policy and Saudi PDPL.',
+    submit: 'Submit application',
+    backToCareers: 'Back to careers',
+    successTitle: 'Application submitted',
+    successMessage:
+      'Thank you for applying. Our team will review your application and contact you if your profile matches the role.',
+    errors: {
+      fullName: 'Full name is required.',
+      emailRequired: 'Email is required.',
+      emailInvalid: 'Please enter a valid email address.',
+      phone: 'Phone is required.',
+      coverLetter: 'Cover letter must be at least 10 characters.',
+      resume: 'Please upload your resume (PDF, DOC, or DOCX).',
+      consent: 'You must agree to data processing.',
+      submitFailed: 'Could not submit application. Please try again.',
+      fixFields: 'Please fix the highlighted fields below.',
+    },
   },
   ctaForm: {
     emailInvalid: 'Please enter a valid email address.',
@@ -237,36 +289,12 @@ const en = {
   },
   projectFilter: {
     all: 'All',
-    civil: 'PMC',
-    electrical: 'Engineering',
-    mechanical: 'Operations',
+    civil: 'Offensive',
+    electrical: 'GRC',
+    mechanical: 'Incident',
     search: 'Search by title...',
   },
-  serviceMenu: [
-    {
-      title: 'Engineering Services',
-      tagline: 'FEED • DESIGN • PROCUREMENT',
-      href: '/services',
-      links: [
-        { label: 'Front-End Engineering (FEED)', href: '/services/front-end-engineering-feed' },
-        { label: 'Design Management', href: '/services/detailed-engineering-design-management' },
-        { label: 'Procurement Management', href: '/services/procurement-management' },
-        { label: 'Commissioning Management', href: '/services/commissioning-management' },
-        { label: 'Operations & Maintenance', href: '/services/operations-maintenance' },
-        { label: 'Plant Optimization', href: '/services/industrial-plant-optimization' },
-      ],
-    },
-    {
-      title: 'Project Management',
-      tagline: 'PMC • PROGRAM • CONSTRUCTION',
-      href: '/services',
-      links: [
-        { label: 'Project Management Consultancy', href: '/services/project-management-consultancy' },
-        { label: 'Program Management', href: '/services/program-management' },
-        { label: 'Construction Management', href: '/services/construction-management' },
-      ],
-    },
-  ],
+  serviceMenu: buildServiceMenu('en'),
 }
 
 const ar: Messages = {
@@ -278,29 +306,39 @@ const ar: Messages = {
     openMenu: 'فتح القائمة',
     closeMenu: 'إغلاق القائمة',
     viewAllServices: 'عرض جميع الخدمات',
-    megaTitle: 'إدارة المشاريع والهندسة',
+    megaTitle: 'الأمن السيبراني',
     megaEyebrow: 'شركة ريلايبل',
-    megaTagline: 'PMC • هندسة • تسليم',
+    megaTagline: 'سلامة البيانات • الخصوصية • الحماية • التشفير',
   },
   footer: {
     services: 'الخدمات',
     company: 'الشركة',
     offices: 'المكاتب',
     contact: 'اتصل بنا',
+    legalNotice:
+      'مسجلة في المملكة العربية السعودية. تُعالج البيانات الشخصية وفق نظام حماية البيانات الشخصية (PDPL).',
+  },
+  legal: {
+    pdplConsent: 'أوافق على جمع ومعالجة بياناتي الشخصية وفق',
+    privacyLink: 'سياسة الخصوصية',
+    pdplSuffix: 'ونظام حماية البيانات الشخصية السعودي (PDPL).',
+    consentRequired: 'يجب الموافقة على معالجة البيانات للمتابعة.',
   },
   cookie: {
-    text: 'نستخدم ملفات تعريف الارتباط لتحسين تجربتك. يرجى مراجعة',
+    text: 'نستخدم ملفات تعريف ارتباط أساسية لتفضيل اللغة وتشغيل الموقع، وفق نظام حماية البيانات الشخصية (PDPL). يرجى مراجعة',
     privacy: 'سياسة الخصوصية',
-    and: 'وسياسة ملفات تعريف الارتباط.',
+    and: 'و',
+    terms: 'شروط الخدمة',
     accept: 'موافق',
+    reject: 'رفض',
   },
   contact: {
     title: 'اتصل بنا',
-    description: 'تواصل معنا لمناقشة مشروعك الهندسي القادم. فريقنا جاهز لمساعدتك.',
+    description: 'تواصل معنا لمناقشة احتياجاتك الأمنية. فريقنا جاهز لمساعدتك.',
     home: 'الرئيسية',
-    heading: 'لنبني معاً شيئاً عظيماً',
+    heading: 'احمِ أعمالك',
     subheading:
-      'شاركنا متطلبات مشروعك وسيرد فريقنا الهندسي خلال يوم عمل واحد.',
+      'شاركنا متطلباتك الأمنية وسيرد فريق الأمن السيبراني خلال يوم عمل واحد.',
     officesTitle: 'مكاتبنا',
     officesIntro:
       'زر أحد مكاتبنا في المملكة أو أرسل لنا رسالة — نرد عادة خلال يوم عمل واحد.',
@@ -340,17 +378,14 @@ const ar: Messages = {
         Khobar: 'الخبر',
         Other: 'أخرى',
       },
-      services: {
-        feed: 'التصميم الهندسي الأولي (FEED)',
-        pmc: 'استشارات إدارة المشاريع',
-        design: 'إدارة التصميم',
-        procurement: 'إدارة المشتريات',
-        program: 'إدارة البرامج',
-        construction: 'إدارة الإنشاءات',
-        commissioning: 'إدارة التشغيل التجريبي',
-        operations: 'العمليات والصيانة',
-        optimization: 'تحسين المنشآت',
-        other: 'أخرى',
+      services: Object.fromEntries(
+        CONTACT_SERVICE_OPTIONS.map((opt) => [opt.key, opt.labelAr]),
+      ) as {
+        offensive: string
+        grc: string
+        incident: string
+        assessments: string
+        other: string
       },
       submit: 'إرسال الرسالة',
       sending: 'جاري الإرسال...',
@@ -364,9 +399,10 @@ const ar: Messages = {
         city: 'يرجى اختيار المدينة.',
         service: 'يرجى اختيار الخدمة.',
         messageRequired: 'الرسالة مطلوبة.',
-        messageShort: 'يجب أن تكون الرسالة 10 أحرف على الأقل.',
-      },
+      messageShort: 'يجب أن تكون الرسالة 10 أحرف على الأقل.',
+      consent: 'يجب الموافقة على معالجة البيانات.',
     },
+  },
   },
   pages: {
     about: {
@@ -496,42 +532,59 @@ const ar: Messages = {
     empty: 'لا توجد وظائف شاغرة حالياً. تحقق لاحقاً.',
     apply: 'قدّم الآن',
   },
+  careerApply: {
+    submitFor: 'قدّم طلبك لوظيفة',
+    responsibilities: 'المسؤوليات الرئيسية',
+    timeline: 'الجدول الزمني',
+    timelineHint: 'مراجعة سريعة بعد التقديم',
+    emailLabel: 'البريد الإلكتروني',
+    locationLabel: 'الموقع',
+    formLabel: 'نموذج التقديم',
+    formTitle: 'أدخل بياناتك وارفع سيرتك الذاتية',
+    fullName: 'الاسم الكامل',
+    fullNamePlaceholder: 'أدخل اسمك الكامل',
+    email: 'البريد الإلكتروني',
+    emailPlaceholder: 'your.email@example.com',
+    phone: 'الهاتف',
+    phonePlaceholder: '+966 XX XXX XXXX',
+    city: 'المدينة',
+    cityPlaceholder: 'مدينتك الحالية',
+    coverLetter: 'خطاب التقديم',
+    coverLetterPlaceholder: 'أخبرنا لماذا أنت المناسب لهذه الفرصة',
+    resume: 'رفع السيرة الذاتية',
+    resumeHint: 'اختر ملف PDF أو DOC أو DOCX',
+    resumeTypes: 'PDF أو DOC أو DOCX فقط — بحد أقصى 10 ميجابايت',
+    browse: 'تصفح',
+    consent: 'أوافق على تخزين ومعالجة بياناتي لأغراض التوظيف وفق سياسة الخصوصية ونظام PDPL السعودي.',
+    submit: 'إرسال الطلب',
+    backToCareers: 'العودة للوظائف',
+    successTitle: 'تم إرسال الطلب',
+    successMessage:
+      'شكراً لتقديمك. سيقوم فريقنا بمراجعة طلبك والتواصل معك إذا كان ملفك مناسباً للوظيفة.',
+    errors: {
+      fullName: 'الاسم الكامل مطلوب.',
+      emailRequired: 'البريد الإلكتروني مطلوب.',
+      emailInvalid: 'يرجى إدخال بريد إلكتروني صالح.',
+      phone: 'رقم الهاتف مطلوب.',
+      coverLetter: 'يجب أن يكون خطاب التقديم 10 أحرف على الأقل.',
+      resume: 'يرجى رفع سيرتك الذاتية (PDF أو DOC أو DOCX).',
+      consent: 'يجب الموافقة على معالجة البيانات.',
+      submitFailed: 'تعذر إرسال الطلب. يرجى المحاولة مرة أخرى.',
+      fixFields: 'يرجى تصحيح الحقول المميزة أدناه.',
+    },
+  },
   ctaForm: {
     emailInvalid: 'يرجى إدخال بريد إلكتروني صالح.',
     success: 'شكراً لك! سنتواصل معك قريباً.',
   },
   projectFilter: {
     all: 'الكل',
-    civil: 'PMC',
-    electrical: 'الهندسة',
-    mechanical: 'العمليات',
+    civil: 'هجومي',
+    electrical: 'GRC',
+    mechanical: 'حوادث',
     search: 'ابحث بالعنوان...',
   },
-  serviceMenu: [
-    {
-      title: 'الخدمات الهندسية',
-      tagline: 'FEED • تصميم • مشتريات',
-      href: '/services',
-      links: [
-        { label: 'التصميم الهندسي الأولي (FEED)', href: '/services/front-end-engineering-feed' },
-        { label: 'إدارة التصميم', href: '/services/detailed-engineering-design-management' },
-        { label: 'إدارة المشتريات', href: '/services/procurement-management' },
-        { label: 'إدارة التشغيل التجريبي', href: '/services/commissioning-management' },
-        { label: 'العمليات والصيانة', href: '/services/operations-maintenance' },
-        { label: 'تحسين المنشآت', href: '/services/industrial-plant-optimization' },
-      ],
-    },
-    {
-      title: 'إدارة المشاريع',
-      tagline: 'استشارات • برامج • إنشاءات',
-      href: '/services',
-      links: [
-        { label: 'استشارات إدارة المشاريع', href: '/services/project-management-consultancy' },
-        { label: 'إدارة البرامج', href: '/services/program-management' },
-        { label: 'إدارة الإنشاءات', href: '/services/construction-management' },
-      ],
-    },
-  ],
+  serviceMenu: buildServiceMenu('ar'),
 }
 
 const catalog: Record<Locale, Messages> = { en, ar }

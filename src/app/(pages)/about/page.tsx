@@ -19,15 +19,7 @@ import { generateCmsPageMetadata } from '@/lib/seo'
 export const revalidate = 0
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await getPageBySlug('about')
-  return generateCmsPageMetadata('about', {
-    title: page?.seoTitle ?? page?.title,
-    titleAr: page?.seoTitleAr,
-    description: page?.seoDescription,
-    descriptionAr: page?.seoDescriptionAr,
-    keywords: page?.seoKeywords,
-    keywordsAr: page?.seoKeywordsAr,
-  })
+  return generateCmsPageMetadata('about')
 }
 
 export default async function AboutPage() {

@@ -22,13 +22,13 @@ function isValidEmail(email: string) {
 
 export default function CTABanner({ cta, formMessages }: CTABannerProps) {
   const content = cta ?? {
-    title: 'Start your engineering project today',
+    title: 'Protect your business today',
     description:
-      'Tell us about your project and our team will respond within one business day.',
+      'Request a consultation and our cybersecurity team will respond within one business day.',
     emailPlaceholder: 'Enter your email address',
     buttonText: 'Request Consultation',
-    secondaryButtonText: 'Contact Engineering Team',
-    secondaryButtonLink: '/contact',
+    secondaryButtonText: 'Chat on WhatsApp',
+    secondaryButtonLink: 'https://wa.me/966563913902',
   }
 
   const [email, setEmail] = useState('')
@@ -109,12 +109,23 @@ export default function CTABanner({ cta, formMessages }: CTABannerProps) {
         </form>
 
         <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            href={content.secondaryButtonLink}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/30 px-6 text-sm font-medium text-white transition-colors hover:border-white/50 hover:bg-white/5"
-          >
-            {content.secondaryButtonText}
-          </Link>
+          {content.secondaryButtonLink.startsWith('http') ? (
+            <a
+              href={content.secondaryButtonLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/30 px-6 text-sm font-medium text-white transition-colors hover:border-white/50 hover:bg-white/5"
+            >
+              {content.secondaryButtonText}
+            </a>
+          ) : (
+            <Link
+              href={content.secondaryButtonLink}
+              className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-white/30 px-6 text-sm font-medium text-white transition-colors hover:border-white/50 hover:bg-white/5"
+            >
+              {content.secondaryButtonText}
+            </Link>
+          )}
         </div>
 
         {isSuccess && (

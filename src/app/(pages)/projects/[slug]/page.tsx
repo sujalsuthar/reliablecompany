@@ -69,6 +69,7 @@ export async function generateMetadata({
     keywordsAr: project.seoKeywordsAr,
     path: `/projects/${params.slug}`,
     image: getImageUrl(project.thumbnail) ?? undefined,
+    absoluteTitle: Boolean(project.seoTitle?.trim()),
   })
 }
 

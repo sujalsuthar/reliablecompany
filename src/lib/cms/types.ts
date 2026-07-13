@@ -66,17 +66,22 @@ export interface Career {
   department?: string
   location?: string
   description?: string
+  descriptionAr?: string
+  responsibilities?: string[]
   status: ContentStatus
   order?: number
 }
 
 export interface CareerApplication {
   _id: string
+  careerId: string
   fullName: string
   email: string
   phone: string
+  city?: string
   position: string
   resumeUrl?: string
+  resumeFileName?: string
   message?: string
   status: 'new' | 'reviewed' | 'archived'
   submittedAt: string
@@ -96,11 +101,48 @@ export interface Enquiry {
   submittedAt: string
 }
 
+export interface Campaign {
+  _id: string
+  name: string
+  badge: string
+  badgeAr?: string
+  title: string
+  titleAr?: string
+  subtitle: string
+  subtitleAr?: string
+  body: string
+  bodyAr?: string
+  ctaText: string
+  ctaTextAr?: string
+  applyPagePath: string
+  floatingLabel: string
+  floatingLabelAr?: string
+  floatingText: string
+  floatingTextAr?: string
+  showDelayMs?: number
+  status: ContentStatus
+  order?: number
+}
+
+export interface CampaignApplication {
+  _id: string
+  campaignId: string
+  campaignName: string
+  fullName: string
+  email: string
+  companyName: string
+  domain: string
+  message?: string
+  status: 'new' | 'reviewed' | 'archived'
+  submittedAt: string
+}
+
 export interface Industry {
   _id: string
   title: string
   titleAr?: string
   icon?: string
+  imageSrc?: string
   order?: number
   status?: ContentStatus
 }
@@ -109,6 +151,7 @@ export interface Certification {
   _id: string
   name: string
   nameAr?: string
+  logoUrl?: string
   order?: number
 }
 
@@ -151,7 +194,10 @@ export interface CmsStore {
   careers: Career[]
   careerApplications: CareerApplication[]
   enquiries: Enquiry[]
+  campaigns: Campaign[]
+  campaignApplications: CampaignApplication[]
   profileVersion?: number
+  legalVersion?: number
 }
 
 export type CmsCollection =
@@ -167,5 +213,7 @@ export type CmsCollection =
   | 'certifications'
   | 'values'
   | 'whyStats'
+  | 'campaigns'
+  | 'campaignApplications'
 
 export type CmsSingleton = 'siteSettings' | 'hero' | 'pages' | 'pageSeo'

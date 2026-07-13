@@ -266,6 +266,15 @@ export async function getActiveCareers(): Promise<Career[]> {
   })
 }
 
+export async function getCareerById(id: string): Promise<Career | null> {
+  return withLocale(async (locale) => {
+    const store = await getStore()
+    const career = store.careers.find((c) => c._id === id && c.status === 'active')
+    if (!career) return null
+    return localizeCareers([career], locale)[0]
+  })
+}
+
 export async function getPageSeoEntry(key: PageSeoKey): Promise<PageSeoEntry> {
   const store = await getStore()
   return mergePageSeo(store.pageSeo)[key]

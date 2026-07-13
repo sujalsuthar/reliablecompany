@@ -12,6 +12,7 @@ export default function BannerForm() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [uploadError, setUploadError] = useState('')
 
   useEffect(() => {
     fetch('/api/cms/singleton/hero')
@@ -34,19 +35,28 @@ export default function BannerForm() {
   }
 
   const uploadHeroImage = async (file: File) => {
-    const compressed = await compressImage(file, 1920)
-    const formData = new FormData()
-    formData.append('file', compressed)
-    const res = await fetch('/api/cms/upload', { method: 'POST', body: formData })
-    if (!res.ok) return
-    const data = (await res.json()) as { url: string }
-    setValues((v) => ({
-      ...v,
-      backgroundImage: {
-        src: data.url,
-        alt: 'Homepage hero background',
-      },
-    }))
+    setUploadError('')
+    try {
+      const compressed = await compressImage(file, 1920)
+      const formData = new FormData()
+      formData.append('file', compressed)
+      const res = await fetch('/api/cms/upload', { method: 'POST', body: formData })
+      const data = (await res.json()) as { url?: string; error?: string }
+
+      if (!res.ok || !data.url) {
+        throw new Error(data.error ?? 'Image upload failed')
+      }
+
+      setValues((v) => ({
+        ...v,
+        backgroundImage: {
+          src: data.url,
+          alt: 'Homepage hero background',
+        },
+      }))
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Image upload failed')
+    }
   }
 
   const backgroundImageUrl = getImageUrl(
@@ -146,6 +156,7 @@ export default function BannerForm() {
         </div>
 
         {message && <p className="text-sm text-emerald-600">{message}</p>}
+        {uploadError && <p className="text-sm text-red-600">{uploadError}</p>}
 
         <button type="submit" disabled={isSaving} className="btn-primary inline-flex gap-2">
           {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

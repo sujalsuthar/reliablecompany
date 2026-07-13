@@ -1,4 +1,4 @@
-const DEFAULT_SITE_URL = 'https://engineering.reliablecompany.sa'
+const DEFAULT_SITE_URL = 'https://reliablecompany.sa'
 
 /** Public site URL (no trailing slash). Used for SEO, sitemap, and Open Graph. */
 export function getSiteUrl(): string {

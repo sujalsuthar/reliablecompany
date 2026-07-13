@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { addEnquiry } from '@/lib/cms/store'
+import { sendWhatsAppNotification } from '@/lib/whatsapp'
 import { checkRateLimit, rateLimitResponse } from '@/lib/security/rate-limit'
 import { getClientIp } from '@/lib/security/request'
 
@@ -13,23 +14,13 @@ interface ContactFormPayload {
   service?: string
   division: string
   message: string
+  consent?: boolean
   /** Honeypot — must stay empty */
   website?: string
 }
 
 const VALID_CITIES = ['Jeddah', 'Riyadh', 'Dammam', 'Mecca', 'Medina', 'Khobar', 'Other']
-const VALID_SERVICES = [
-  'feed',
-  'pmc',
-  'design',
-  'procurement',
-  'program',
-  'construction',
-  'commissioning',
-  'operations',
-  'optimization',
-  'other',
-]
+const VALID_SERVICES = ['offensive', 'grc', 'incident', 'assessments', 'other']
 
 const LIMITS = {
   fullName: 200,
@@ -95,6 +86,10 @@ function validatePayload(data: Partial<ContactFormPayload>) {
     errors.message = 'Message is too long.'
   }
 
+  if (!data.consent) {
+    errors.consent = 'You must agree to data processing.'
+  }
+
   return errors
 }
 
@@ -137,6 +132,18 @@ export async function POST(request: NextRequest) {
       division: trimField(body.division, LIMITS.division),
       message: trimField(body.message, LIMITS.message),
     })
+
+    void sendWhatsAppNotification(
+      [
+        'New contact enquiry — Reliable Company',
+        `Name: ${trimField(body.fullName, LIMITS.fullName)}`,
+        `Email: ${trimField(body.email, LIMITS.email)}`,
+        `Phone: ${trimField(body.phone, LIMITS.phone)}`,
+        `City: ${body.city!.trim()}`,
+        `Service: ${body.service!.trim()}`,
+        `Message: ${trimField(body.message, LIMITS.message)}`,
+      ].join('\n'),
+    )
 
     return NextResponse.json({ success: true })
   } catch {

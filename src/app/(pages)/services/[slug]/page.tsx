@@ -8,7 +8,7 @@ import ServiceListingCard from '@/components/ui/ServiceListingCard'
 import { getServiceBySlug, getServices } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { getMessages } from '@/lib/i18n/messages'
-import { SERVICE_IMAGE_MAP } from '@/lib/seed-data'
+import { resolveServiceImages } from '@/lib/service-images'
 import { generateLocalizedMetadata } from '@/lib/seo'
 
 interface ServiceDetailPageProps {
@@ -49,6 +49,7 @@ export async function generateMetadata({
     keywords: service.seoKeywords,
     keywordsAr: service.seoKeywordsAr,
     path: `/services/${params.slug}`,
+    absoluteTitle: Boolean(service.seoTitle?.trim()),
   })
 }
 
@@ -70,7 +71,7 @@ export default async function ServiceDetailPage({
 
   const categoryLabel =
     locale === 'ar' && service.categoryAr ? service.categoryAr : service.category
-  const heroImage = service.heroImageSrc || SERVICE_IMAGE_MAP[params.slug]
+  const { heroImage, overviewImage } = resolveServiceImages(service, params.slug)
 
   const breadcrumbs = [
     { label: m.common.home, href: '/' },
@@ -90,7 +91,7 @@ export default async function ServiceDetailPage({
 
       <ServiceDetailContent
         service={service}
-        heroImage={heroImage}
+        overviewImage={overviewImage}
         locale={locale}
         labels={{
           services: m.serviceDetail.servicesLabel,

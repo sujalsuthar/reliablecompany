@@ -38,7 +38,7 @@ export const DEFAULT_PAGE_HERO_IMAGES: PageHeroImages = {
   terms: PROFILE_IMAGES.hero,
 }
 
-export const DEFAULT_HERO_HOME_IMAGE = PROFILE_IMAGES.hero
+export const DEFAULT_HERO_HOME_IMAGE = '/hero-cybersecurity.png'
 export const DEFAULT_MEGA_MENU_IMAGE = PROFILE_IMAGES.pmc
 
 export const PAGE_HERO_LABELS: Record<PageHeroKey, string> = {

@@ -11,9 +11,9 @@ const SITE_NAME = 'Reliable Company'
 const SITE_NAME_AR = 'شركة ريلايبل'
 const DEFAULT_OG_IMAGE = '/og-default.png'
 const DEFAULT_DESCRIPTION =
-  'Reliable Company delivers integrated project management consultancy and engineering services for complex projects across Saudi Arabia.'
+  'Reliable Company provides professional Vulnerability Assessment and Penetration Testing (VAPT), web application security testing, and cybersecurity consulting across Saudi Arabia.'
 const DEFAULT_DESCRIPTION_AR =
-  'تقدم شركة ريلايبل استشارات إدارة المشاريع المتكاملة والهندسة للمشاريع المعقدة في المملكة العربية السعودية.'
+  'تقدم شركة ريلايبل خدمات تقييم الثغرات واختبار الاختراق (VAPT) واختبار أمان تطبيقات الويب واستشارات الأمن السيبراني في المملكة العربية السعودية.'
 
 export interface SEOOptions {
   title: string
@@ -51,17 +51,17 @@ export function generateMetadata(options: SEOOptions): Metadata {
   } = options
 
   const isAr = locale === 'ar'
-  const resolvedTitle = isAr && titleAr?.trim() ? titleAr : title
-  const resolvedDescription = isAr && descriptionAr?.trim() ? descriptionAr : description
-  const resolvedKeywords = isAr && keywordsAr?.trim() ? keywordsAr : keywords
-  const resolvedOgTitle =
-    isAr && titleAltAr?.trim() ? titleAltAr : titleAlt?.trim() ? titleAlt : resolvedTitle
-  const resolvedOgDescription =
-    isAr && descriptionAltAr?.trim()
-      ? descriptionAltAr
-      : descriptionAlt?.trim()
-        ? descriptionAlt
-        : resolvedDescription
+  const primaryTitle = (isAr ? titleAr : title)?.trim() ?? ''
+  const altTitle = (isAr ? titleAltAr : titleAlt)?.trim() ?? ''
+  const primaryDescription = (isAr ? descriptionAr : description)?.trim() ?? ''
+  const altDescription = (isAr ? descriptionAltAr : descriptionAlt)?.trim() ?? ''
+
+  const resolvedTitle = primaryTitle || altTitle
+  const resolvedDescription =
+    primaryDescription || altDescription || (isAr ? DEFAULT_DESCRIPTION_AR : DEFAULT_DESCRIPTION)
+  const resolvedKeywords = (isAr && keywordsAr?.trim() ? keywordsAr : keywords)?.trim()
+  const resolvedOgTitle = altTitle || primaryTitle
+  const resolvedOgDescription = altDescription || primaryDescription || resolvedDescription
   const siteName = isAr ? SITE_NAME_AR : SITE_NAME
 
   const canonicalPath = path.startsWith('/') ? path : `/${path}`
@@ -121,6 +121,12 @@ export async function generateCmsPageMetadata(
   const locale = await getLocale()
   const entry = await getPageSeoEntry(key)
 
+  const definedOverrides = Object.fromEntries(
+    Object.entries(overrides ?? {}).filter(
+      ([, value]) => value !== undefined && value !== null && value !== '',
+    ),
+  ) as Partial<SEOOptions>
+
   return generateMetadata({
     title: entry.seoTitle ?? '',
     titleAr: entry.seoTitleAr,
@@ -133,9 +139,10 @@ export async function generateCmsPageMetadata(
     keywords: entry.seoKeywords,
     keywordsAr: entry.seoKeywordsAr,
     path: entry.path,
-    absoluteTitle: key === 'home',
+    // CMS meta titles are full titles — do not append layout template suffix
+    absoluteTitle: true,
     locale,
-    ...overrides,
+    ...definedOverrides,
   })
 }
 

@@ -1,6 +1,9 @@
 import { createInitialStore } from '@/lib/cms/init-store'
+import { SEED_PRIVACY_PAGE, SEED_TERMS_PAGE } from '@/lib/seed-data'
 import type {
   BlogPost,
+  Campaign,
+  CampaignApplication,
   Career,
   CareerApplication,
   Certification,
@@ -19,12 +22,14 @@ import {
   DEFAULT_HOMEPAGE_SECTIONS,
 } from '@/lib/cms/editor/sections'
 import { mergePageSeo } from '@/lib/cms/page-seo'
-import { COMPANY_PHONE, LOGO_PATH } from '@/lib/brand'
+import { COMPANY_ADDRESS, COMPANY_FACEBOOK_URL, COMPANY_PHONE, LOGO_PATH } from '@/lib/brand'
 import { DEFAULT_MEGA_MENU_IMAGE, DEFAULT_PAGE_HERO_IMAGES } from '@/lib/page-heroes'
-import { readRawStore, writeRawStore, isKvEnabled } from '@/lib/cms/storage'
+import { readRawStore, writeRawStore, isMongoEnabled } from '@/lib/cms/storage'
+import { buildSeedServices } from '@/lib/service-catalog'
 import type { Division, Hero, SiteSettings, TeamMember, WhyStat } from '@/lib/types'
 
-export const PROFILE_VERSION = 7
+export const PROFILE_VERSION = 14
+export const LEGAL_VERSION = 1
 
 let memoryStore: CmsStore | null = null
 
@@ -40,6 +45,12 @@ function migrateStore(store: CmsStore): CmsStore {
   }
   if (!store.sectionContent) {
     migrated.sectionContent = initial.sectionContent
+  }
+  if (!store.sectionContent?.campaigns) {
+    migrated.sectionContent = {
+      ...migrated.sectionContent,
+      campaigns: initial.sectionContent.campaigns,
+    }
   }
   if (!store.ctaBanner) {
     migrated.ctaBanner = initial.ctaBanner
@@ -62,6 +73,18 @@ function migrateStore(store: CmsStore): CmsStore {
     contactHeadingAr: store.footer?.contactHeadingAr ?? initial.footer.contactHeadingAr,
   }
 
+  const darkWebLinks = [
+    { label: 'Dark Web Assessment', href: '/dark-web-assessment' },
+    { label: 'Dark Web Monitoring', href: '/services/dark-web-monitoring' },
+  ]
+  const serviceLinks = [...(migrated.footer.serviceLinks ?? [])]
+  for (const link of darkWebLinks) {
+    if (!serviceLinks.some((item) => item.href === link.href)) {
+      serviceLinks.push(link)
+    }
+  }
+  migrated.footer.serviceLinks = serviceLinks
+
   const legacyEmail = 'engineering@reliablecompany.sa'
   const email =
     !store.globalContent?.email || store.globalContent.email === legacyEmail
@@ -69,16 +92,24 @@ function migrateStore(store: CmsStore): CmsStore {
       : store.globalContent.email
 
   const legacyPhones = new Set(['', '+966 12 345 6789', '+966123456789'])
+  const legacyAddresses = new Set([
+    '',
+    '8648, Prince Muteb Street, Al Aziziyah District, Jeddah, Saudi Arabia. P.O. Box: 23342',
+  ])
   const phone =
     !store.globalContent?.phone || legacyPhones.has(store.globalContent.phone)
       ? initial.globalContent.phone || COMPANY_PHONE
       : store.globalContent.phone
+  const address =
+    !store.globalContent?.address || legacyAddresses.has(store.globalContent.address)
+      ? COMPANY_ADDRESS
+      : store.globalContent.address
 
   migrated.globalContent = {
     ...initial.globalContent,
     ...store.globalContent,
     logoUrl: store.globalContent?.logoUrl || LOGO_PATH,
-    address: store.globalContent?.address || initial.globalContent.address,
+    address,
     addressAr: store.globalContent?.addressAr ?? initial.globalContent.addressAr,
     phone,
     email,
@@ -91,6 +122,10 @@ function migrateStore(store: CmsStore): CmsStore {
     ...store.siteSettings,
     phone,
     email,
+    address:
+      !store.siteSettings?.address || legacyAddresses.has(store.siteSettings.address)
+        ? COMPANY_ADDRESS
+        : store.siteSettings.address,
   }
 
   migrated.pageHeroImages = {
@@ -113,16 +148,104 @@ function migrateStore(store: CmsStore): CmsStore {
     }
   }
 
+  const currentSections = [...(migrated.homepageSections ?? [])]
+  const hasCampaignSection = currentSections.some((section) => section.type === 'campaigns')
+  if (!hasCampaignSection) {
+    const heroIndex = currentSections.findIndex((section) => section.type === 'hero')
+    const campaignsSection = createSectionInstance('campaigns')
+    if (heroIndex >= 0) {
+      currentSections.splice(heroIndex + 1, 0, campaignsSection)
+    } else {
+      currentSections.unshift(campaignsSection)
+    }
+    migrated.homepageSections = currentSections
+  }
+
+  if (!Array.isArray(store.careerApplications)) {
+    migrated.careerApplications = []
+  }
+  if (!Array.isArray(store.enquiries)) {
+    migrated.enquiries = []
+  }
+  if (!Array.isArray(store.campaignApplications)) {
+    migrated.campaignApplications = []
+  }
+  if (!Array.isArray(store.campaigns) || store.campaigns.length === 0) {
+    migrated.campaigns = initial.campaigns
+  }
+
+  if ((store.legalVersion ?? 0) < LEGAL_VERSION) {
+    migrated.pages = {
+      ...store.pages,
+      privacy: SEED_PRIVACY_PAGE,
+      terms: SEED_TERMS_PAGE,
+    }
+    migrated.legalVersion = LEGAL_VERSION
+  }
+
   return migrated
 }
 
-function applyEngineeringSeedMigration(store: CmsStore): CmsStore {
+function migrateToV14(store: CmsStore): CmsStore {
+  let next = store
+
+  const slug = 'dark-web-monitoring'
+  if (!next.services.some((s) => s.slug?.current === slug)) {
+    const seed = buildSeedServices().find((s) => s.slug?.current === slug)
+    if (seed) {
+      const maxOrder = Math.max(0, ...next.services.map((s) => s.order ?? 0))
+      next = {
+        ...next,
+        services: [...next.services, { ...seed, order: maxOrder + 1 }],
+      }
+    }
+  }
+
+  const facebookUrl = COMPANY_FACEBOOK_URL
+  next = {
+    ...next,
+    globalContent: {
+      ...next.globalContent,
+      facebook: next.globalContent.facebook || facebookUrl,
+    },
+    siteSettings: {
+      ...next.siteSettings,
+      facebook: next.siteSettings?.facebook || facebookUrl,
+    },
+    profileVersion: PROFILE_VERSION,
+  }
+
+  return next
+}
+
+function applyCyberSecuritySeedMigration(store: CmsStore): CmsStore {
   const initial = createInitialStore()
   return {
     ...initial,
     profileVersion: PROFILE_VERSION,
     enquiries: store.enquiries ?? [],
     careerApplications: store.careerApplications ?? [],
+    campaignApplications: store.campaignApplications ?? [],
+    campaigns: initial.campaigns,
+    services: initial.services,
+    projects: initial.projects,
+    blogPosts: initial.blogPosts,
+    industries: initial.industries,
+    divisions: initial.divisions,
+    team: initial.team,
+    certifications: initial.certifications,
+    values: initial.values,
+    whyStats: initial.whyStats,
+    careers: initial.careers,
+    hero: initial.hero,
+    homepageSections: initial.homepageSections,
+    sectionContent: initial.sectionContent,
+    ctaBanner: initial.ctaBanner,
+    pageSeo: initial.pageSeo,
+    pageHeroImages: {
+      ...initial.pageHeroImages,
+      ...store.pageHeroImages,
+    },
     pages: {
       ...initial.pages,
       privacy: store.pages?.privacy ?? initial.pages.privacy,
@@ -130,33 +253,37 @@ function applyEngineeringSeedMigration(store: CmsStore): CmsStore {
     },
     globalContent: {
       ...initial.globalContent,
+      ...store.globalContent,
       logoUrl: store.globalContent?.logoUrl || LOGO_PATH,
       phone: store.globalContent?.phone || initial.globalContent.phone,
       email: store.globalContent?.email || initial.globalContent.email,
     },
     navbar: {
       ...initial.navbar,
+      ...store.navbar,
       megaMenuImageUrl:
         store.navbar?.megaMenuImageUrl || initial.navbar.megaMenuImageUrl,
     },
     footer: {
       ...initial.footer,
+      ...store.footer,
       certificationImageUrl:
         store.footer?.certificationImageUrl ?? initial.footer.certificationImageUrl,
     },
+    fieldStyles: store.fieldStyles ?? {},
   }
 }
 
 async function persistStore(store: CmsStore) {
-  // On Vercel KV, skip in-memory cache so every instance reads fresh writes
-  if (!isKvEnabled()) {
+  // On MongoDB, skip in-memory cache so every instance reads fresh writes
+  if (!isMongoEnabled()) {
     memoryStore = store
   }
   await writeRawStore(store)
 }
 
 export async function getStore(): Promise<CmsStore> {
-  if (!isKvEnabled() && memoryStore) return memoryStore
+  if (!isMongoEnabled() && memoryStore) return memoryStore
 
   const raw = await readRawStore()
   if (!raw) {
@@ -169,12 +296,16 @@ export async function getStore(): Promise<CmsStore> {
   let store = migrateStore(raw)
 
   if ((store.profileVersion ?? 0) < PROFILE_VERSION) {
-    store = applyEngineeringSeedMigration(store)
+    if ((store.profileVersion ?? 0) >= 13) {
+      store = migrateToV14(store)
+    } else {
+      store = applyCyberSecuritySeedMigration(store)
+    }
     await persistStore(store)
     return store
   }
 
-  if (!isKvEnabled()) {
+  if (!isMongoEnabled()) {
     memoryStore = store
   }
   return store
@@ -187,8 +318,12 @@ export async function saveStore(store: CmsStore) {
   })
   memoryStore = null
   await persistStore(synced)
-  const { revalidatePublicContent } = await import('@/lib/cms/revalidate')
-  revalidatePublicContent()
+  try {
+    const { revalidatePublicContent } = await import('@/lib/cms/revalidate')
+    revalidatePublicContent(synced)
+  } catch (error) {
+    console.error('[cms] revalidate after save failed:', error)
+  }
 }
 
 /** Keeps siteSettings in sync with globalContent for legacy readers */
@@ -204,6 +339,7 @@ export function syncGlobalToSiteSettings(store: CmsStore): CmsStore {
       address: store.globalContent.address,
       linkedIn: store.globalContent.linkedIn,
       twitter: store.globalContent.twitter,
+      facebook: store.globalContent.facebook,
       logo: store.globalContent.logoUrl
         ? { _type: 'image', src: store.globalContent.logoUrl, alt: store.globalContent.siteName }
         : store.siteSettings.logo,
@@ -222,6 +358,8 @@ type CollectionItemMap = {
   careers: Career
   careerApplications: CareerApplication
   enquiries: Enquiry
+  campaigns: Campaign
+  campaignApplications: CampaignApplication
   industries: Industry
   divisions: Division
   team: TeamMember
@@ -250,6 +388,9 @@ export async function createCollectionItem<K extends CmsCollection>(
   data: Omit<CollectionItemMap[K], '_id'> & { _id?: string },
 ): Promise<CollectionItemMap[K]> {
   const store = await getStore()
+  if (!Array.isArray(store[collection])) {
+    ;(store[collection] as CollectionItemMap[K][]) = [] as CollectionItemMap[K][]
+  }
   const item = { ...data, _id: data._id ?? newId(collection) } as CollectionItemMap[K]
   ;(store[collection] as CollectionItemMap[K][]).push(item)
   await saveStore(store)
@@ -298,6 +439,12 @@ export async function deleteCollectionItem(
       break
     case 'enquiries':
       store.enquiries = next as Enquiry[]
+      break
+    case 'campaigns':
+      store.campaigns = next as Campaign[]
+      break
+    case 'campaignApplications':
+      store.campaignApplications = next as CampaignApplication[]
       break
     case 'industries':
       store.industries = next as Industry[]
@@ -448,4 +595,22 @@ export async function addCareerApplication(
     status: 'new',
     submittedAt: new Date().toISOString(),
   })
+}
+
+export async function addCampaignApplication(
+  application: Omit<CampaignApplication, '_id' | 'status' | 'submittedAt'>,
+) {
+  return createCollectionItem('campaignApplications', {
+    ...application,
+    status: 'new',
+    submittedAt: new Date().toISOString(),
+  })
+}
+
+export async function getActiveCampaign(): Promise<Campaign | null> {
+  const store = await getStore()
+  const active = store.campaigns
+    .filter((campaign) => campaign.status === 'active')
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+  return active[0] ?? null
 }

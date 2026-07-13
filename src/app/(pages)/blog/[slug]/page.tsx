@@ -38,6 +38,7 @@ export async function generateMetadata({
     keywords: post.seoKeywords,
     keywordsAr: post.seoKeywordsAr,
     path: `/blog/${params.slug}`,
+    absoluteTitle: Boolean(post.seoTitle?.trim()),
   })
 }
 

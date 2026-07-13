@@ -2,9 +2,12 @@ import type { Metadata } from 'next'
 import { Cairo, Inter, Tajawal } from 'next/font/google'
 
 import CookieBanner from '@/components/layout/CookieBanner'
+import CampaignWidget from '@/components/layout/CampaignWidget'
+import WhatsAppButton from '@/components/ui/WhatsAppButton'
 import Footer from '@/components/layout/Footer'
 import Navbar from '@/components/layout/Navbar'
 import { LocaleProvider } from '@/components/providers/LocaleProvider'
+import { NavOverlayProvider } from '@/components/providers/NavOverlayProvider'
 import PageTransition from '@/components/ui/PageTransition'
 import { isRtl } from '@/lib/i18n/config'
 import { getLocale } from '@/lib/i18n/locale'
@@ -41,6 +44,11 @@ export const metadata: Metadata = {
     template: '%s | Reliable Company',
     default: 'Reliable Company',
   },
+  icons: {
+    icon: [{ url: '/logo.png', type: 'image/png' }],
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 }
 
 export default async function RootLayout({
@@ -64,12 +72,16 @@ export default async function RootLayout({
         data-locale={locale}
       >
         <LocaleProvider locale={locale}>
-          <Navbar />
-          <main className="flex-1">
-            <PageTransition>{children}</PageTransition>
-          </main>
-          <Footer />
-          <CookieBanner />
+          <NavOverlayProvider>
+            <Navbar />
+            <main className="flex-1">
+              <PageTransition>{children}</PageTransition>
+            </main>
+            <Footer />
+            <CookieBanner />
+            <CampaignWidget />
+            <WhatsAppButton />
+          </NavOverlayProvider>
         </LocaleProvider>
       </body>
     </html>

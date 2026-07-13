@@ -3,11 +3,11 @@ import type { NextRequest } from 'next/server'
 
 import { COOKIE_NAME, verifySessionToken } from '@/lib/auth'
 import {
-  DEFAULT_LOCALE,
   isLocale,
   LOCALE_COOKIE,
   LOCALE_MANUAL_COOKIE,
 } from '@/lib/i18n/config'
+import { detectLocaleFromRequest } from '@/lib/i18n/geo-locale'
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365
 
@@ -67,22 +67,23 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // --- Locale (public pages): English by default worldwide ---
+  // --- Locale (public pages) ---
   const savedLocale = request.cookies.get(LOCALE_COOKIE)?.value
   const manualPreference = request.cookies.get(LOCALE_MANUAL_COOKIE)?.value === '1'
 
-  // Only honor Arabic (or other locale) when the user explicitly chose it
+  // User explicitly chose a language — always respect it
   if (manualPreference && isLocale(savedLocale)) {
     return NextResponse.next()
   }
 
-  // Everyone else gets English — first visit, geo, or browser language ignored
-  if (savedLocale === DEFAULT_LOCALE) {
+  // Auto-detect: Saudi Arabia → Arabic, otherwise English
+  const detectedLocale = detectLocaleFromRequest(request)
+  if (savedLocale === detectedLocale) {
     return NextResponse.next()
   }
 
   const response = NextResponse.next()
-  setLocaleCookies(response, DEFAULT_LOCALE, false)
+  setLocaleCookies(response, detectedLocale, false)
   return response
 }
 

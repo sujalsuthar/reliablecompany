@@ -4,10 +4,12 @@ export const LOGO_ALT = 'Reliable Company — شركة ريلايبل'
 export const COMPANY_PHONE = '+966 56 391 3902'
 export const COMPANY_EMAIL = 'info@reliablecompany.sa'
 export const COMPANY_WEBSITE = 'https://reliablecompany.sa'
+export const COMPANY_FACEBOOK_URL =
+  'https://www.facebook.com/profile.php?id=61591194992498&sk=about'
 export const COMPANY_ADDRESS =
-  '8648, Prince Muteb Street, Al Aziziyah District, Jeddah, Saudi Arabia. P.O. Box: 23342'
+  'B64B, Prince Muteb Street, Al Aziziyah District, Jeddah, Saudi Arabia'
 export const COMPANY_ADDRESS_AR =
-  '8648، شارع الأمير متعب، حي العزيزية، جدة، المملكة العربية السعودية. ص.ب: 23342'
+  'B64B، شارع الأمير متعب، حي العزيزية، جدة، المملكة العربية السعودية'
 export const DIVISION_TAGLINE = 'A division of Reliable Company'
 export const DIVISION_TAGLINE_AR = 'قسم من شركة ريلايبل'
 export const CERTIFICATIONS_FOOTER_IMAGE = '/certifications-footer.png'
@@ -24,45 +26,23 @@ export const GOOGLE_MAPS_LINK =
   'https://www.google.com/maps/place/Reliable+company/@21.5587664,39.2126601,17z'
 
 export const DEFAULT_HERO = {
-  eyebrow: 'PROJECT MANAGEMENT & ENGINEERING',
-  headlinePrefix: 'Collaborate, Communicate,',
-  headlineHighlight: 'Complete.',
+  eyebrow: 'CYBER SECURITY & VAPT',
+  headlinePrefix: 'Professional Cyber Security &',
+  headlineHighlight: 'Penetration Testing Services in Saudi Arabia',
   subheadline:
-    'Reliable Company delivers integrated Project Management consultancy and Engineering services — from FEED and design management through construction, commissioning, operations, and plant optimization across Saudi Arabia.',
+    'Reliable Company provides professional Vulnerability Assessment and Penetration Testing (VAPT), web application security testing, network security assessment, and cybersecurity consulting services for businesses across Saudi Arabia.',
   primaryButtonText: 'Explore Our Services',
   primaryButtonLink: '/services',
-  secondaryButtonText: 'Contact Us',
-  secondaryButtonLink: '/contact',
+  secondaryButtonText: 'Chat on WhatsApp',
+  secondaryButtonLink: 'https://wa.me/966563913902',
   stats: [
     { _key: '1', number: '100+', label: 'Years Combined Experience' },
-    { _key: '2', number: '500+', label: 'Projects Delivered' },
-    { _key: '3', number: '2016', label: 'Founded in UAE' },
-    { _key: '4', number: '2023', label: 'Expanded to KSA' },
+    { _key: '2', number: '500+', label: 'Industrial Projects Managed' },
+    { _key: '3', number: '300+', label: 'Clients Secured' },
+    { _key: '4', number: '30,000+', label: 'Vulnerabilities Remediated' },
   ],
 } as const
 
-export const SERVICE_MENU = [
-  {
-    title: 'Engineering Services',
-    tagline: 'FEED • DESIGN • PROCUREMENT',
-    href: '/services',
-    links: [
-      { label: 'Front-End Engineering (FEED)', href: '/services/front-end-engineering-feed' },
-      { label: 'Design Management', href: '/services/detailed-engineering-design-management' },
-      { label: 'Procurement Management', href: '/services/procurement-management' },
-      { label: 'Commissioning Management', href: '/services/commissioning-management' },
-      { label: 'Operations & Maintenance', href: '/services/operations-maintenance' },
-      { label: 'Plant Optimization', href: '/services/industrial-plant-optimization' },
-    ],
-  },
-  {
-    title: 'Project Management',
-    tagline: 'PMC • PROGRAM • CONSTRUCTION',
-    href: '/services',
-    links: [
-      { label: 'Project Management Consultancy', href: '/services/project-management-consultancy' },
-      { label: 'Program Management', href: '/services/program-management' },
-      { label: 'Construction Management', href: '/services/construction-management' },
-    ],
-  },
-] as const
+import { buildServiceMenu } from '@/lib/service-catalog'
+
+export const SERVICE_MENU = buildServiceMenu('en')

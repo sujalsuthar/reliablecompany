@@ -53,8 +53,8 @@ export default async function CareersPage() {
                     </p>
                   )}
                   <Link
-                    href="/contact"
-                    className="mt-4 inline-flex text-sm font-medium text-primary-600 hover:underline"
+                    href={`/careers/apply/${job._id}`}
+                    className="mt-4 inline-flex rounded-lg bg-primary-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-primary-700"
                   >
                     {m.careersPage.apply} →
                   </Link>

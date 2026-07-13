@@ -8,6 +8,7 @@ import { FormEvent, useEffect, useState } from 'react'
 import AdminHeader from '@/components/admin/AdminHeader'
 import BilingualField from '@/components/admin/BilingualField'
 import type { CollectionConfig } from '@/lib/cms/collections'
+import { compressImage } from '@/lib/cms/editor/image-utils'
 import { itemToFormValues } from '@/lib/cms/transform'
 
 interface CollectionFormProps {
@@ -23,6 +24,18 @@ export default function CollectionForm({ config, pathKey, itemId }: CollectionFo
   const [isLoading, setIsLoading] = useState(!isNew)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
+  const [uploadingField, setUploadingField] = useState<string | null>(null)
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null)
+  const [storageReady, setStorageReady] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    fetch('/api/cms/storage-status')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: { uploadsReady?: boolean } | null) => {
+        setStorageReady(data?.uploadsReady ?? null)
+      })
+      .catch(() => setStorageReady(null))
+  }, [])
 
   useEffect(() => {
     if (!itemId) return
@@ -49,12 +62,38 @@ export default function CollectionForm({ config, pathKey, itemId }: CollectionFo
   }
 
   const handleImageUpload = async (key: string, file: File) => {
-    const formData = new FormData()
-    formData.append('file', file)
-    const res = await fetch('/api/cms/upload', { method: 'POST', body: formData })
-    if (!res.ok) return
-    const data = (await res.json()) as { url: string }
-    setField(key, data.url)
+    setUploadingField(key)
+    setError('')
+
+    try {
+      let fileToUpload: File = file
+      try {
+        fileToUpload = await compressImage(file, 1920)
+      } catch {
+        fileToUpload = file
+      }
+
+      const formData = new FormData()
+      formData.append('file', fileToUpload)
+      const res = await fetch('/api/cms/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      })
+      const data = (await res.json()) as { url?: string; error?: string }
+
+      if (!res.ok || !data.url) {
+        throw new Error(data.error ?? 'Image upload failed')
+      }
+
+      setField(key, data.url)
+      setUploadSuccess(key)
+      setTimeout(() => setUploadSuccess(null), 3000)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Image upload failed')
+    } finally {
+      setUploadingField(null)
+    }
   }
 
   const handleSubmit = async (event: FormEvent) => {
@@ -72,6 +111,7 @@ export default function CollectionForm({ config, pathKey, itemId }: CollectionFo
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
+        credentials: 'include',
       })
 
       if (!res.ok) {
@@ -107,6 +147,13 @@ export default function CollectionForm({ config, pathKey, itemId }: CollectionFo
       />
 
       <form onSubmit={handleSubmit} className="max-w-3xl space-y-5 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        {storageReady === false && (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            File uploads are not configured on this server. Set{' '}
+            <strong>MONGODB_URI</strong> in your environment variables (MongoDB Atlas recommended).
+            CMS data and uploads persist across redeployments. You can still paste an image URL in the text field below.
+          </div>
+        )}
         {config.fields.map((field) => {
           if (field.key.endsWith('Ar')) return null
 
@@ -189,22 +236,57 @@ export default function CollectionForm({ config, pathKey, itemId }: CollectionFo
                 placeholder="Comma-separated values"
               />
             ) : field.type === 'image' ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
+                {values[field.key] ? (
+                  <div className="relative h-40 w-full max-w-md overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={String(values[field.key])}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                ) : null}
                 <input
                   type="text"
                   value={String(values[field.key] ?? '')}
                   onChange={(e) => setField(field.key, e.target.value)}
                   className="w-full rounded-lg border border-gray-200 px-4 py-2.5 text-sm"
-                  placeholder="/uploads/image.jpg"
+                  placeholder="/uploads/image.jpg or https://..."
                 />
                 <input
                   type="file"
                   accept="image/*"
+                  disabled={uploadingField === field.key}
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) handleImageUpload(field.key, file)
+                    e.target.value = ''
                   }}
                   className="text-sm"
+                />
+                {uploadingField === field.key && (
+                  <p className="text-xs text-gray-500">Uploading image…</p>
+                )}
+                {uploadSuccess === field.key && (
+                  <p className="text-xs text-emerald-600">Image uploaded — click Save to apply on the site.</p>
+                )}
+              </div>
+            ) : field.key === 'resumeUrl' && values[field.key] ? (
+              <div className="space-y-2">
+                <a
+                  href={String(values[field.key]).startsWith('/') ? String(values[field.key]) : String(values[field.key])}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex text-sm font-medium text-primary-600 hover:underline"
+                >
+                  Download resume
+                </a>
+                <input
+                  type="text"
+                  value={String(values[field.key] ?? '')}
+                  readOnly
+                  className="w-full rounded-lg border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-500"
                 />
               </div>
             ) : (
