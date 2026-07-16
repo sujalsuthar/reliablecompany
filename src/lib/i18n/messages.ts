@@ -286,6 +286,7 @@ const en = {
   ctaForm: {
     emailInvalid: 'Please enter a valid email address.',
     success: "Thank you! We'll be in touch soon.",
+    submitError: 'Something went wrong. Please try again.',
   },
   projectFilter: {
     all: 'All',
@@ -576,6 +577,7 @@ const ar: Messages = {
   ctaForm: {
     emailInvalid: 'يرجى إدخال بريد إلكتروني صالح.',
     success: 'شكراً لك! سنتواصل معك قريباً.',
+    submitError: 'حدث خطأ. يرجى المحاولة مرة أخرى.',
   },
   projectFilter: {
     all: 'الكل',

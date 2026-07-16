@@ -230,7 +230,7 @@ export default async function DarkWebMonitoringPage() {
         </div>
       </section>
 
-      <CTABannerSection />
+      <CTABannerSection source="dark-web-monitoring" />
     </>
   )
 }

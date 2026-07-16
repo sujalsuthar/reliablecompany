@@ -1,6 +1,6 @@
 import { clsx } from 'clsx'
 import { User } from 'lucide-react'
-import Image from 'next/image'
+import CmsImage from '@/components/ui/CmsImage'
 
 import { getImageUrl } from '@/lib/images'
 import type { SanityImage } from '@/lib/types'
@@ -26,7 +26,7 @@ export default function TeamMemberCard({
     <article className={clsx('card-base overflow-hidden', className)}>
       <div className="relative aspect-square w-full overflow-hidden bg-primary-50">
         {photoUrl ? (
-          <Image
+          <CmsImage
             src={photoUrl}
             alt={photo?.alt ?? name}
             fill

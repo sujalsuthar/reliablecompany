@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import CmsImage from '@/components/ui/CmsImage'
 import CmsPageHero from '@/components/ui/CmsPageHero'
 import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
@@ -77,6 +78,19 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
 
       <section className="section-pad bg-white">
         <div className="site-container max-w-3xl">
+          {post.coverImageSrc ? (
+            <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-xl bg-primary-50">
+              <CmsImage
+                src={post.coverImageSrc}
+                alt={post.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 768px"
+                priority
+              />
+            </div>
+          ) : null}
+
           <div className="mb-8 flex flex-wrap items-center gap-3 text-sm text-gray-500">
             <time dateTime={post.updatedAt}>{formatDate(post.updatedAt, locale)}</time>
             {post.author && <span>· {post.author}</span>}

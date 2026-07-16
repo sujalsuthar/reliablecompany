@@ -1,5 +1,5 @@
 import { createInitialStore } from '@/lib/cms/init-store'
-import { SEED_PRIVACY_PAGE, SEED_TERMS_PAGE } from '@/lib/seed-data'
+import { SEED_PRIVACY_PAGE, SEED_TERMS_PAGE, SEED_WHY_STATS } from '@/lib/seed-data'
 import type {
   BlogPost,
   Campaign,
@@ -28,7 +28,7 @@ import { readRawStore, writeRawStore } from '@/lib/cms/storage'
 import { buildSeedServices } from '@/lib/service-catalog'
 import type { Division, Hero, SiteSettings, TeamMember, WhyStat } from '@/lib/types'
 
-export const PROFILE_VERSION = 14
+export const PROFILE_VERSION = 15
 export const LEGAL_VERSION = 1
 
 let memoryStore: CmsStore | null = null
@@ -205,6 +205,44 @@ function migrateStore(store: CmsStore): CmsStore {
   return migrated
 }
 
+/** Resets Why Us header copy, stats, and removes duplicate homepage Why Us blocks. */
+function restoreWhyUsSection(store: CmsStore): CmsStore {
+  const initial = createInitialStore()
+  const sections = [...(store.homepageSections ?? [])]
+  let keptWhyUs = false
+  const homepageSections = sections
+    .filter((section) => {
+      if (section.type !== 'whyUs') return true
+      if (keptWhyUs) return false
+      keptWhyUs = true
+      return true
+    })
+    .map((section) =>
+      section.type === 'whyUs' ? { ...section, visible: true } : section,
+    )
+
+  if (!keptWhyUs) {
+    const servicesIndex = homepageSections.findIndex((section) => section.type === 'services')
+    const whyUsSection = createSectionInstance('whyUs')
+    if (servicesIndex >= 0) {
+      homepageSections.splice(servicesIndex + 1, 0, whyUsSection)
+    } else {
+      homepageSections.push(whyUsSection)
+    }
+  }
+
+  return {
+    ...store,
+    homepageSections,
+    sectionContent: {
+      ...store.sectionContent,
+      whyUs: { ...initial.sectionContent.whyUs },
+    },
+    whyStats: SEED_WHY_STATS.map((stat) => ({ ...stat })),
+    profileVersion: PROFILE_VERSION,
+  }
+}
+
 function migrateToV14(store: CmsStore): CmsStore {
   let next = store
 
@@ -231,7 +269,7 @@ function migrateToV14(store: CmsStore): CmsStore {
       ...next.siteSettings,
       facebook: next.siteSettings?.facebook || facebookUrl,
     },
-    profileVersion: PROFILE_VERSION,
+    profileVersion: 14,
   }
 
   return next
@@ -313,10 +351,16 @@ export async function getStore(): Promise<CmsStore> {
   let store = migrateStore(raw)
 
   if ((store.profileVersion ?? 0) < PROFILE_VERSION) {
-    if ((store.profileVersion ?? 0) >= 13) {
-      store = migrateToV14(store)
-    } else {
+    const version = store.profileVersion ?? 0
+    if (version < 13) {
       store = applyCyberSecuritySeedMigration(store)
+    } else {
+      if (version < 14) {
+        store = migrateToV14(store)
+      }
+      if (version < 15) {
+        store = restoreWhyUsSection(store)
+      }
     }
     await persistStore(store)
     return store

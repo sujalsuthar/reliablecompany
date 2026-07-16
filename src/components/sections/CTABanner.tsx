@@ -10,9 +10,12 @@ import type { CtaBannerContent } from '@/lib/cms/editor/types'
 interface CTABannerProps {
   cta?: CtaBannerContent
   phone?: string
+  /** Identifies where the form was submitted (stored in CMS enquiries). */
+  source?: string
   formMessages?: {
     emailInvalid: string
     success: string
+    submitError?: string
   }
 }
 
@@ -20,7 +23,11 @@ function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
-export default function CTABanner({ cta, formMessages }: CTABannerProps) {
+export default function CTABanner({
+  cta,
+  formMessages,
+  source = 'website',
+}: CTABannerProps) {
   const content = cta ?? {
     title: 'Protect your business today',
     description:
@@ -39,6 +46,15 @@ export default function CTABanner({ cta, formMessages }: CTABannerProps) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
+    const honeypot = (
+      event.currentTarget.elements.namedItem('website') as HTMLInputElement | null
+    )?.value
+    if (honeypot?.trim()) {
+      setIsSuccess(true)
+      setEmail('')
+      return
+    }
+
     if (!isValidEmail(email)) {
       setError(formMessages?.emailInvalid ?? 'Please enter a valid email address.')
       setIsSuccess(false)
@@ -49,11 +65,34 @@ export default function CTABanner({ cta, formMessages }: CTABannerProps) {
     setIsSubmitting(true)
     setIsSuccess(false)
 
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    try {
+      const response = await fetch('/api/cta-enquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source }),
+      })
 
-    setIsSubmitting(false)
-    setIsSuccess(true)
-    setEmail('')
+      const result = (await response.json()) as { success?: boolean; error?: string }
+
+      if (!response.ok || !result.success) {
+        throw new Error(
+          result.error ??
+            formMessages?.submitError ??
+            'Could not submit request. Please try again.',
+        )
+      }
+
+      setIsSuccess(true)
+      setEmail('')
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : (formMessages?.submitError ?? 'Could not submit request. Please try again.'),
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -67,6 +106,14 @@ export default function CTABanner({ cta, formMessages }: CTABannerProps) {
           className="relative mx-auto mt-10 max-w-xl"
           noValidate
         >
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            className="pointer-events-none absolute -left-[9999px] h-0 w-0 opacity-0"
+            aria-hidden
+          />
           <div className="flex flex-col gap-3 sm:flex-row">
             <input
               type="email"

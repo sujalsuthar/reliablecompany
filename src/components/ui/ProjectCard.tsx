@@ -3,7 +3,7 @@
 import { clsx } from 'clsx'
 import { motion } from 'framer-motion'
 import { Building2, Server, Settings2, Zap } from 'lucide-react'
-import Image from 'next/image'
+import CmsImage from '@/components/ui/CmsImage'
 import type { LucideIcon } from 'lucide-react'
 
 import { divisionStyles } from '@/lib/division-styles'
@@ -40,7 +40,7 @@ function ProjectCardImage({
   if (imageUrl) {
 
     return (
-      <Image
+      <CmsImage
         src={imageUrl}
         alt={thumbnail?.alt ?? title}
         fill

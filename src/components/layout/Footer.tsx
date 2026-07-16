@@ -1,14 +1,11 @@
-import Image from 'next/image'
-
 import Link from 'next/link'
 
 import { createLucideIcon } from 'lucide-react'
 
-
-
 import Logo from '@/components/layout/Logo'
 
 import ContactDetails from '@/components/ui/ContactDetails'
+import CmsImage from '@/components/ui/CmsImage'
 
 import { CERTIFICATIONS_FOOTER_IMAGE, COMPANY_FACEBOOK_URL, COMPANY_PHONE } from '@/lib/brand'
 
@@ -122,7 +119,7 @@ export default async function Footer() {
 
               <div className="rounded-lg bg-white/95 p-3">
 
-                <Image
+                <CmsImage
 
                   src={certImage}
 

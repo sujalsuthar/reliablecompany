@@ -258,7 +258,7 @@ export const COLLECTION_CONFIGS: Record<CmsCollection, CollectionConfig> = {
       { key: 'excerptAr', label: 'Excerpt (Arabic)', type: 'textarea', rows: 2 },
       { key: 'content', label: 'Content (English)', type: 'textarea', rows: 12 },
       { key: 'contentAr', label: 'Content (Arabic)', type: 'textarea', rows: 12 },
-      { key: 'coverImageSrc', label: 'Cover Image', type: 'image' },
+      { key: 'coverImageSrc', label: 'Cover Image', type: 'image', helpText: 'Shown on blog listing cards and the article page.' },
       { key: 'author', label: 'Author', type: 'text' },
       { key: 'status', label: 'Status', type: 'select', options: publishOptions },
       ...seoFields,

@@ -35,7 +35,7 @@ export default async function HomePageRenderer() {
           case 'projects':
             return <Projects key={section.id} />
           case 'cta':
-            return <CTABannerSection key={section.id} />
+            return <CTABannerSection key={section.id} source="homepage" />
           case 'blog':
             return <BlogSection key={section.id} />
           case 'certifications':

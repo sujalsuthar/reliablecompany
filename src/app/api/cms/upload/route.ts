@@ -8,6 +8,15 @@ import { filePublicUrl, saveFileToMongo } from '@/lib/cms/file-storage'
 import { isMongoEnabled } from '@/lib/cms/storage'
 import { validateImageUpload } from '@/lib/security/upload'
 
+function buildUploadFilename(originalName: string, mime: string): string {
+  const ext = mime.split('/')[1]?.replace('jpeg', 'jpg') ?? 'bin'
+  const baseName = originalName
+    .replace(/\.[^.]+$/, '')
+    .replace(/[^a-zA-Z0-9._-]/g, '-')
+    .slice(0, 60)
+  return `${Date.now()}-${baseName || 'image'}.${ext}`
+}
+
 export async function POST(request: NextRequest) {
   const authError = await requireAdminSession()
   if (authError) return authError
@@ -28,9 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
-    const ext = validation.mime.split('/')[1]?.replace('jpeg', 'jpg') ?? 'bin'
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '-').slice(0, 80)
-    const filename = `${Date.now()}-${safeName}.${ext}`
+    const filename = buildUploadFilename(file.name, validation.mime)
 
     if (process.env.VERCEL && !isMongoEnabled()) {
       return NextResponse.json(

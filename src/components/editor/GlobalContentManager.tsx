@@ -9,8 +9,8 @@ import { Globe, Loader2, Save } from 'lucide-react'
 import { useState } from 'react'
 
 import BilingualField from '@/components/admin/BilingualField'
+import ImageUploadField from '@/components/admin/ImageUploadField'
 import { useEditor } from '@/components/editor/EditorProvider'
-import { compressImage } from '@/lib/cms/editor/image-utils'
 import {
   DEFAULT_PAGE_HERO_IMAGES,
   PAGE_HERO_LABELS,
@@ -40,22 +40,10 @@ export default function GlobalContentManager() {
     store.navbar?.megaMenuImageUrl ?? '',
   )
   const [saved, setSaved] = useState(false)
-
-  const uploadImage = async (
-    file: File,
-    maxWidth: number,
-    onUrl: (url: string) => void,
-  ) => {
-    const compressed = await compressImage(file, maxWidth)
-    const formData = new FormData()
-    formData.append('file', compressed)
-    const res = await fetch('/api/cms/upload', { method: 'POST', body: formData })
-    if (!res.ok) return
-    const data = (await res.json()) as { url: string }
-    onUrl(data.url)
-  }
+  const [error, setError] = useState('')
 
   const saveAll = async () => {
+    setError('')
     for (const field of FIELDS) {
       await updateField(`globalContent.${field.key}`, draft[field.key])
     }
@@ -84,22 +72,16 @@ export default function GlobalContentManager() {
       </p>
 
       <div className="space-y-3">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">Site Logo</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) void uploadImage(f, 800, (url) => setDraft((d) => ({ ...d, logoUrl: url })))
-            }}
-            className="text-xs"
-          />
-          {draft.logoUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={draft.logoUrl} alt="Logo preview" className="mt-2 h-10 object-contain" />
-          )}
-        </div>
+        <ImageUploadField
+          compact
+          label="Site Logo"
+          value={draft.logoUrl}
+          onChange={(url) => setDraft((d) => ({ ...d, logoUrl: url }))}
+          maxWidth={800}
+          previewFit="contain"
+          previewClassName="h-12 w-32"
+          onError={setError}
+        />
 
         {FIELDS.map((field) => (
           <div key={field.key}>
@@ -142,86 +124,43 @@ export default function GlobalContentManager() {
           </p>
           <div className="space-y-3">
             {(Object.keys(PAGE_HERO_LABELS) as PageHeroKey[]).map((key) => (
-              <div key={key}>
-                <label className="mb-1 block text-xs font-medium text-gray-600">
-                  {PAGE_HERO_LABELS[key]}
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0]
-                    if (f) {
-                      void uploadImage(f, 1920, (url) =>
-                        setHeroImagesDraft((h) => ({ ...h, [key]: url })),
-                      )
-                    }
-                  }}
-                  className="text-xs"
-                />
-                {heroImagesDraft[key] && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={heroImagesDraft[key]}
-                    alt={`${PAGE_HERO_LABELS[key]} preview`}
-                    className="mt-2 h-16 w-full rounded-lg object-cover"
-                  />
-                )}
-              </div>
+              <ImageUploadField
+                key={key}
+                compact
+                label={PAGE_HERO_LABELS[key]}
+                value={heroImagesDraft[key] ?? ''}
+                onChange={(url) => setHeroImagesDraft((h) => ({ ...h, [key]: url }))}
+                maxWidth={1920}
+                onError={setError}
+              />
             ))}
           </div>
         </div>
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
-            Services Mega Menu Image
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) void uploadImage(f, 1200, setMegaMenuImage)
-            }}
-            className="text-xs"
-          />
-          {megaMenuImage && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={megaMenuImage}
-              alt="Mega menu preview"
-              className="mt-2 h-20 w-full rounded-lg object-cover"
-            />
-          )}
-        </div>
+        <ImageUploadField
+          compact
+          label="Services Mega Menu Image"
+          value={megaMenuImage}
+          onChange={setMegaMenuImage}
+          maxWidth={1200}
+          onError={setError}
+        />
 
-        <div>
-          <label className="mb-1 block text-xs font-medium text-gray-600">
-            Footer Certification Logos
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const f = e.target.files?.[0]
-              if (f) {
-                void uploadImage(f, 1200, (url) =>
-                  setFooterDraft((fd) => ({ ...fd, certificationImageUrl: url })),
-                )
-              }
-            }}
-            className="text-xs"
-          />
-          {footerDraft.certificationImageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={footerDraft.certificationImageUrl}
-              alt="Certifications preview"
-              className="mt-2 max-h-16 w-full object-contain"
-            />
-          )}
-        </div>
+        <ImageUploadField
+          compact
+          label="Footer Certification Logos"
+          value={footerDraft.certificationImageUrl ?? ''}
+          onChange={(url) =>
+            setFooterDraft((fd) => ({ ...fd, certificationImageUrl: url }))
+          }
+          maxWidth={1200}
+          previewFit="contain"
+          previewClassName="h-16 w-full"
+          onError={setError}
+        />
       </div>
+
+      {error && <p className="text-xs text-red-600">{error}</p>}
 
       <button
         type="button"

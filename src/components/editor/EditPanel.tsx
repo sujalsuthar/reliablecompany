@@ -10,8 +10,8 @@ import { AlignCenter, AlignLeft, AlignRight, Loader2, Save, X } from 'lucide-rea
 import { useEffect, useState } from 'react'
 
 import BilingualField from '@/components/admin/BilingualField'
+import ImageUploadField from '@/components/admin/ImageUploadField'
 import { useEditor } from '@/components/editor/EditorProvider'
-import { compressImage } from '@/lib/cms/editor/image-utils'
 import type { ButtonFieldValue, FieldStyle, ImageFieldValue } from '@/lib/cms/editor/types'
 import { getFieldStyle } from '@/lib/cms/editor/field-path'
 import { toArPath } from '@/lib/i18n/bilingual'
@@ -22,6 +22,7 @@ export default function EditPanel() {
   const [draft, setDraft] = useState<unknown>('')
   const [draftAr, setDraftAr] = useState('')
   const [styleDraft, setStyleDraft] = useState<FieldStyle>({})
+  const [uploadError, setUploadError] = useState('')
 
   const arPath = activeField ? toArPath(activeField.path) : ''
 
@@ -30,6 +31,7 @@ export default function EditPanel() {
     setDraft(getFieldValue(activeField.path) ?? '')
     setDraftAr(String(getFieldValue(arPath) ?? ''))
     setStyleDraft(getFieldStyle(store, activeField.path))
+    setUploadError('')
   }, [activeField, arPath, getFieldValue, store])
 
   if (!activeField) {
@@ -52,17 +54,6 @@ export default function EditPanel() {
       await updateField(`fieldStyles.${activeField.path}`, styleDraft)
     }
     setActiveField(null)
-  }
-
-  const uploadImage = async (file: File) => {
-    const compressed = await compressImage(file)
-    const formData = new FormData()
-    formData.append('file', compressed)
-    const res = await fetch('/api/cms/upload', { method: 'POST', body: formData })
-    if (!res.ok) return
-    const data = (await res.json()) as { url: string }
-    const current = (draft as ImageFieldValue) ?? {}
-    setDraft({ ...current, src: data.url })
   }
 
   const btn = (draft as ButtonFieldValue) ?? { text: '', href: '' }
@@ -177,23 +168,13 @@ export default function EditPanel() {
 
         {activeField.type === 'image' && (
           <>
-            <input
-              type="text"
-              placeholder="Image URL"
+            <ImageUploadField
+              compact
+              label="Image"
               value={img.src ?? ''}
-              onChange={(e) => setDraft({ ...img, src: e.target.value })}
-              className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+              onChange={(url) => setDraft({ ...img, src: url })}
+              onError={setUploadError}
             />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) uploadImage(file)
-              }}
-              className="text-sm"
-            />
-            <p className="text-xs text-gray-500">Images are auto-compressed on upload.</p>
             <input
               type="text"
               placeholder="Alt text"
@@ -208,6 +189,7 @@ export default function EditPanel() {
               onChange={(e) => setDraft({ ...img, caption: e.target.value })}
               className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
             />
+            {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
           </>
         )}
 
