@@ -535,6 +535,13 @@ export async function addHomepageSection(type: CmsStore['homepageSections'][0]['
   const store = await getStore()
   const section = createSectionInstance(type)
   store.homepageSections.push(section)
+  if (type === 'customLine') {
+    store.sectionContent[section.id] = {
+      label: 'Update',
+      title: 'Add your custom line here',
+      description: '',
+    }
+  }
   await saveStore(store)
   return section
 }
@@ -545,14 +552,28 @@ export async function duplicateHomepageSection(id: string) {
   if (!source) return null
   const copy = createSectionInstance(source.type)
   store.homepageSections.push(copy)
+  if (source.type === 'customLine') {
+    const sourceContent = store.sectionContent[source.id]
+    store.sectionContent[copy.id] = sourceContent
+      ? structuredClone(sourceContent)
+      : {
+          label: 'Update',
+          title: 'Add your custom line here',
+          description: '',
+        }
+  }
   await saveStore(store)
   return copy
 }
 
 export async function removeHomepageSection(id: string) {
   const store = await getStore()
+  const removed = store.homepageSections.find((s) => s.id === id)
   const next = store.homepageSections.filter((s) => s.id !== id)
   if (next.length === store.homepageSections.length) return false
+  if (removed?.type === 'customLine') {
+    delete store.sectionContent[id]
+  }
   if (next.length === 0) {
     store.homepageSections = DEFAULT_HOMEPAGE_SECTIONS.map((type) =>
       createSectionInstance(type),

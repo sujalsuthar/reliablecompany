@@ -6,6 +6,7 @@
 export type SectionType =
   | 'hero'
   | 'campaigns'
+  | 'customLine'
   | 'services'
   | 'whyUs'
   | 'industries'

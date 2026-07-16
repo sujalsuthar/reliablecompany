@@ -32,6 +32,17 @@ export const SECTION_DEFINITIONS: Record<SectionType, SectionDefinition> = {
       { path: 'sectionContent.campaigns.description', type: 'richtext', label: 'Description' },
     ],
   },
+  customLine: {
+    type: 'customLine',
+    label: 'Custom Line',
+    description: 'Repeatable text block for custom one-liners or short notes',
+    icon: 'Text',
+    fields: [
+      { path: 'sectionContent.{sectionId}.label', type: 'text', label: 'Label' },
+      { path: 'sectionContent.{sectionId}.title', type: 'text', label: 'Line Text' },
+      { path: 'sectionContent.{sectionId}.description', type: 'richtext', label: 'Description (optional)' },
+    ],
+  },
   services: {
     type: 'services',
     label: 'Services',

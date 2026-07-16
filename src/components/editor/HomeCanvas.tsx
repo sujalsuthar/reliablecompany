@@ -7,6 +7,7 @@
 
 import BlogSectionEdit from '@/components/editor/sections/BlogSectionEdit'
 import CtaSectionEdit from '@/components/editor/sections/CtaSectionEdit'
+import Editable from '@/components/editor/Editable'
 import HeroSectionEdit from '@/components/editor/sections/HeroSectionEdit'
 import PlaceholderSectionEdit from '@/components/editor/sections/PlaceholderSectionEdit'
 import WhyUsSectionEdit from '@/components/editor/sections/WhyUsSectionEdit'
@@ -16,7 +17,7 @@ import DivisionsGrid from '@/components/sections/DivisionsGrid'
 import FeaturedProjectsGrid from '@/components/sections/FeaturedProjectsGrid'
 import ServicesGrid from '@/components/sections/ServicesGrid'
 import { getLucideIcon } from '@/lib/icons'
-import type { SectionType } from '@/lib/cms/editor/types'
+import type { HomepageSection } from '@/lib/cms/editor/types'
 
 function DataSection({
   sectionKey,
@@ -61,8 +62,9 @@ function IndustriesPreview() {
   )
 }
 
-function SectionBlock({ type }: { type: SectionType }) {
+function SectionBlock({ section }: { section: HomepageSection }) {
   const { store } = useEditor()
+  const { type } = section
   const services = store.services.filter((s) => s.status !== 'inactive')
   const projects = store.projects.filter((p) => p.featured && p.status !== 'inactive')
 
@@ -95,6 +97,46 @@ function SectionBlock({ type }: { type: SectionType }) {
       )
     case 'cta':
       return <CtaSectionEdit />
+    case 'customLine': {
+      const content = store.sectionContent[section.id] ?? {
+        label: 'Custom line',
+        title: 'Add your one-line announcement here',
+        description: '',
+      }
+      return (
+        <section className="border-y border-primary-100 bg-primary-50/40 py-6">
+          <div className="site-container">
+            <Editable
+              path={`sectionContent.${section.id}.label`}
+              type="text"
+              label="Custom line label"
+              as="p"
+              className="text-xs font-semibold uppercase tracking-[0.16em] text-primary-600"
+            >
+              {content.label}
+            </Editable>
+            <Editable
+              path={`sectionContent.${section.id}.title`}
+              type="text"
+              label="Custom line text"
+              as="p"
+              className="mt-1 text-lg font-semibold text-primary-900"
+            >
+              {content.title}
+            </Editable>
+            <Editable
+              path={`sectionContent.${section.id}.description`}
+              type="richtext"
+              label="Custom line description"
+              as="p"
+              className="mt-1 text-sm text-primary-800/80"
+            >
+              {content.description}
+            </Editable>
+          </div>
+        </section>
+      )
+    }
     default:
       return <PlaceholderSectionEdit type={type} />
   }
@@ -111,7 +153,7 @@ export default function HomeCanvas() {
       </div>
       {sections.map((section) => (
         <div key={section.id} data-section-id={section.id}>
-          <SectionBlock type={section.type} />
+          <SectionBlock section={section} />
         </div>
       ))}
     </div>
