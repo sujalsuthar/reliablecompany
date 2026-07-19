@@ -9,7 +9,17 @@ import Industries from '@/components/sections/Industries'
 import Projects from '@/components/sections/Projects'
 import Services from '@/components/sections/Services'
 import WhyUs from '@/components/sections/WhyUs'
+import SectionErrorBoundary from '@/components/home/SectionErrorBoundary'
 import { getHomepageSections } from '@/lib/content'
+import type { ReactNode } from 'react'
+
+function wrap(name: string, node: ReactNode, key: string) {
+  return (
+    <SectionErrorBoundary key={key} name={name}>
+      {node}
+    </SectionErrorBoundary>
+  )
+}
 
 export default async function HomePageRenderer() {
   const sections = await getHomepageSections()
@@ -19,27 +29,35 @@ export default async function HomePageRenderer() {
       {sections.map((section) => {
         switch (section.type) {
           case 'hero':
-            return <Hero key={section.id} />
+            return wrap('hero', <Hero />, section.id)
           case 'campaigns':
-            return <Campaigns key={section.id} />
+            return wrap('campaigns', <Campaigns />, section.id)
           case 'customLine':
-            return <CustomLine key={section.id} sectionKey={section.id} />
+            return wrap(
+              'customLine',
+              <CustomLine sectionKey={section.id} />,
+              section.id,
+            )
           case 'services':
-            return <Services key={section.id} />
+            return wrap('services', <Services />, section.id)
           case 'whyUs':
-            return <WhyUs key={section.id} />
+            return wrap('whyUs', <WhyUs />, section.id)
           case 'industries':
-            return <Industries key={section.id} />
+            return wrap('industries', <Industries />, section.id)
           case 'divisions':
-            return <Divisions key={section.id} />
+            return wrap('divisions', <Divisions />, section.id)
           case 'projects':
-            return <Projects key={section.id} />
+            return wrap('projects', <Projects />, section.id)
           case 'cta':
-            return <CTABannerSection key={section.id} source="homepage" />
+            return wrap(
+              'cta',
+              <CTABannerSection source="homepage" />,
+              section.id,
+            )
           case 'blog':
-            return <BlogSection key={section.id} />
+            return wrap('blog', <BlogSection />, section.id)
           case 'certifications':
-            return <Certifications key={section.id} />
+            return wrap('certifications', <Certifications />, section.id)
           default:
             return null
         }

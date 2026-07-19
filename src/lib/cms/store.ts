@@ -32,9 +32,9 @@ export const PROFILE_VERSION = 15
 export const LEGAL_VERSION = 1
 
 let memoryStore: CmsStore | null = null
-/** Short TTL cache so Masar/shared hosting does not hit Mongo on every request. */
+/** Short TTL — Masar may run multiple Node workers; long TTL made CMS edits look "not saved". */
 let memoryStoreCachedAt = 0
-const MEMORY_TTL_MS = 300_000
+const MEMORY_TTL_MS = 5_000
 
 function getCachedStore(): CmsStore | null {
   if (!memoryStore) return null

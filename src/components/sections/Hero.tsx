@@ -68,7 +68,9 @@ export default async function Hero() {
           )}
 
           <h1 className="text-[32px] font-semibold leading-[1.15] tracking-tight text-white sm:text-[42px] lg:text-[52px]">
-            <span className="block">{parsed.prefix}</span>
+            {(parsed.prefix || hero.headline) && (
+              <span className="block">{parsed.prefix || hero.headline}</span>
+            )}
             {parsed.highlight && (
               <span className="mt-1 block text-accent-400">{parsed.highlight}</span>
             )}

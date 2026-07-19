@@ -99,6 +99,7 @@ export default function SectionManager() {
     await fetch('/api/cms/editor/sections', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
       body: JSON.stringify({ sections: next }),
     })
     await refreshStore()
