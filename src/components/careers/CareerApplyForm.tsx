@@ -104,10 +104,20 @@ export default function CareerApplyForm({ job }: CareerApplyFormProps) {
       body.append('resume', resumeFile!)
 
       const res = await fetch('/api/careers/apply', { method: 'POST', body })
-      const data = (await res.json()) as {
+      let data: {
         success?: boolean
         error?: string
         errors?: FormErrors
+      } = {}
+
+      try {
+        data = (await res.json()) as typeof data
+      } catch {
+        throw new Error(
+          res.status === 413
+            ? 'Resume file is too large for the server. Please upload a PDF under 5 MB.'
+            : t.errors.submitFailed,
+        )
       }
 
       if (!res.ok || !data.success) {

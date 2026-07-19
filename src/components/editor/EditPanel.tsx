@@ -13,26 +13,55 @@ import BilingualField from '@/components/admin/BilingualField'
 import ImageUploadField from '@/components/admin/ImageUploadField'
 import { useEditor } from '@/components/editor/EditorProvider'
 import type { ButtonFieldValue, FieldStyle, ImageFieldValue } from '@/lib/cms/editor/types'
-import { getFieldStyle } from '@/lib/cms/editor/field-path'
+import { getFieldStyle, resolveFieldValue } from '@/lib/cms/editor/field-path'
 import { toArPath } from '@/lib/i18n/bilingual'
 
 export default function EditPanel() {
-  const { activeField, setActiveField, getFieldValue, updateField, isSaving, store } =
-    useEditor()
+  const {
+    activeField,
+    setActiveField,
+    updateField,
+    isSaving,
+    store,
+    setPreviewDraft,
+  } = useEditor()
   const [draft, setDraft] = useState<unknown>('')
   const [draftAr, setDraftAr] = useState('')
   const [styleDraft, setStyleDraft] = useState<FieldStyle>({})
   const [uploadError, setUploadError] = useState('')
+  const [saveError, setSaveError] = useState('')
 
   const arPath = activeField ? toArPath(activeField.path) : ''
+  const activePath = activeField?.path ?? ''
 
+  // Only reset local draft when the selected field changes — not on every store update
   useEffect(() => {
     if (!activeField) return
-    setDraft(getFieldValue(activeField.path) ?? '')
-    setDraftAr(String(getFieldValue(arPath) ?? ''))
+    const nextDraft = resolveFieldValue(store, activeField.path) ?? ''
+    const nextAr = String(resolveFieldValue(store, toArPath(activeField.path)) ?? '')
+    setDraft(nextDraft)
+    setDraftAr(nextAr)
     setStyleDraft(getFieldStyle(store, activeField.path))
     setUploadError('')
-  }, [activeField, arPath, getFieldValue, store])
+    setSaveError('')
+    setPreviewDraft({
+      path: activeField.path,
+      value: nextDraft,
+      arPath: toArPath(activeField.path),
+      arValue: nextAr,
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional: reset only when field path changes
+  }, [activePath])
+
+  const syncPreview = (nextDraft: unknown, nextAr?: string) => {
+    if (!activeField) return
+    setPreviewDraft({
+      path: activeField.path,
+      value: nextDraft,
+      arPath,
+      arValue: nextAr ?? draftAr,
+    })
+  }
 
   if (!activeField) {
     return (
@@ -48,12 +77,18 @@ export default function EditPanel() {
   }
 
   const save = async () => {
-    await updateField(activeField.path, draft)
-    if (activeField.type === 'text' || activeField.type === 'richtext') {
-      await updateField(arPath, draftAr)
-      await updateField(`fieldStyles.${activeField.path}`, styleDraft)
+    setSaveError('')
+    try {
+      await updateField(activeField.path, draft)
+      if (activeField.type === 'text' || activeField.type === 'richtext') {
+        await updateField(arPath, draftAr)
+        await updateField(`fieldStyles.${activeField.path}`, styleDraft)
+      }
+      setPreviewDraft(null)
+      setActiveField(null)
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : 'Failed to save changes')
     }
-    setActiveField(null)
   }
 
   const btn = (draft as ButtonFieldValue) ?? { text: '', href: '' }
@@ -76,15 +111,21 @@ export default function EditPanel() {
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+      <div className="flex-1 space-y-5 overflow-y-auto p-5">
         {(activeField.type === 'text' || activeField.type === 'richtext') && (
           <>
             <BilingualField
               label={activeField.label}
               enValue={String(draft ?? '')}
               arValue={draftAr}
-              onEnChange={(v) => setDraft(v)}
-              onArChange={setDraftAr}
+              onEnChange={(v) => {
+                setDraft(v)
+                syncPreview(v)
+              }}
+              onArChange={(v) => {
+                setDraftAr(v)
+                syncPreview(draft, v)
+              }}
               type={activeField.type === 'richtext' ? 'textarea' : 'text'}
               rows={activeField.type === 'richtext' ? 8 : 2}
             />
@@ -235,10 +276,11 @@ export default function EditPanel() {
         )}
       </div>
 
-      <div className="border-t border-gray-100 p-4">
+      <div className="space-y-2 border-t border-gray-100 p-4">
+        {saveError && <p className="text-xs text-red-600">{saveError}</p>}
         <button
           type="button"
-          onClick={save}
+          onClick={() => void save()}
           disabled={isSaving}
           className="btn-primary flex w-full items-center justify-center gap-2"
         >

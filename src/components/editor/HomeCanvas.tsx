@@ -104,7 +104,7 @@ function SectionBlock({ section }: { section: HomepageSection }) {
         description: '',
       }
       return (
-        <section className="border-y border-primary-100 bg-primary-50/40 py-6">
+        <section className="border-y border-primary-100 bg-white py-8 sm:py-10">
           <div className="site-container">
             <Editable
               path={`sectionContent.${section.id}.label`}
@@ -120,7 +120,11 @@ function SectionBlock({ section }: { section: HomepageSection }) {
               type="text"
               label="Custom line text"
               as="p"
-              className="mt-1 text-lg font-semibold text-primary-900"
+              className={
+                content.title && !content.label && !content.description
+                  ? 'text-center text-xl font-semibold tracking-tight text-primary-900 sm:text-2xl'
+                  : 'mt-1 text-lg font-semibold text-primary-900'
+              }
             >
               {content.title}
             </Editable>
@@ -129,7 +133,7 @@ function SectionBlock({ section }: { section: HomepageSection }) {
               type="richtext"
               label="Custom line description"
               as="p"
-              className="mt-1 text-sm text-primary-800/80"
+              className="mt-2 text-sm leading-relaxed text-primary-800/80"
             >
               {content.description}
             </Editable>

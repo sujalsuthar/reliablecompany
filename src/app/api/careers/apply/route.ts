@@ -27,6 +27,26 @@ function trim(value: string | null | undefined, max: number): string {
   return (value ?? '').trim().slice(0, max)
 }
 
+/** FormData file values can be File or Blob depending on the Node/runtime. */
+function asResumeFile(value: FormDataEntryValue | null): File | null {
+  if (!value || typeof value === 'string') return null
+
+  if (typeof File !== 'undefined' && value instanceof File) {
+    if (!value.name || value.size <= 0) return null
+    return value
+  }
+
+  if (typeof Blob !== 'undefined' && value instanceof Blob && value.size > 0) {
+    const named = value as Blob & { name?: string }
+    const name = named.name?.trim() || 'resume.pdf'
+    return new File([value], name, {
+      type: value.type || 'application/octet-stream',
+    })
+  }
+
+  return null
+}
+
 export async function POST(request: NextRequest) {
   const ip = getClientIp(request)
   const rate = checkRateLimit({
@@ -39,9 +59,22 @@ export async function POST(request: NextRequest) {
     return rateLimitResponse(rate.retryAfterSec)
   }
 
+  let formData: FormData
   try {
-    const formData = await request.formData()
+    formData = await request.formData()
+  } catch (error) {
+    console.error('[careers] formData parse failed:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error:
+          'Could not read the uploaded file. Please use a PDF under 10 MB and try again.',
+      },
+      { status: 400 },
+    )
+  }
 
+  try {
     if (trim(formData.get('website') as string | null, 200)) {
       return NextResponse.json({ success: true })
     }
@@ -54,7 +87,7 @@ export async function POST(request: NextRequest) {
     const coverLetter = trim(formData.get('coverLetter') as string | null, LIMITS.coverLetter)
     const position = trim(formData.get('position') as string | null, LIMITS.position)
     const consent = formData.get('consent') === 'true' || formData.get('consent') === 'on'
-    const resume = formData.get('resume')
+    const resumeFile = asResumeFile(formData.get('resume'))
 
     const errors: Record<string, string> = {}
 
@@ -70,7 +103,7 @@ export async function POST(request: NextRequest) {
       errors.coverLetter = 'Cover letter must be at least 10 characters.'
     }
     if (!consent) errors.consent = 'You must agree to data processing.'
-    if (!resume || !(resume instanceof File)) {
+    if (!resumeFile) {
       errors.resume = 'Resume is required.'
     }
 
@@ -87,10 +120,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const resumeFile = resume as File
-    const bytes = await resumeFile.arrayBuffer()
+    const bytes = await resumeFile!.arrayBuffer()
     const buffer = Buffer.from(bytes)
-    const validation = validateResumeUpload(resumeFile, buffer)
+    const validation = validateResumeUpload(resumeFile!, buffer)
 
     if (!validation.ok) {
       return NextResponse.json(
@@ -112,7 +144,7 @@ export async function POST(request: NextRequest) {
     let resumeUrl: string
 
     try {
-      const saved = await saveResumeFile(buffer, validation.mime, resumeFile.name)
+      const saved = await saveResumeFile(buffer, validation.mime, resumeFile!.name)
       resumeUrl = saved.url
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Resume upload failed'
@@ -138,7 +170,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: `Could not upload resume. Set MONGODB_URI in your environment, or email ${COMPANY_EMAIL}.`,
+          error: `Could not upload resume. Please try a smaller PDF, or email ${COMPANY_EMAIL}.`,
         },
         { status: 500 },
       )
@@ -152,7 +184,7 @@ export async function POST(request: NextRequest) {
       city: city || undefined,
       position: position || job.title,
       resumeUrl,
-      resumeFileName: resumeFile.name,
+      resumeFileName: resumeFile!.name,
       message: coverLetter,
     })
 
@@ -170,7 +202,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('[careers] apply failed:', error)
     return NextResponse.json(
-      { success: false, error: 'Could not submit application. Please try again.' },
+      {
+        success: false,
+        error: `Could not submit application. Please try again, or email ${COMPANY_EMAIL}.`,
+      },
       { status: 500 },
     )
   }

@@ -34,9 +34,17 @@ export default function Editable({
 }: EditableProps) {
   const editor = useEditorOptional()
 
+  const fieldStyle = editor ? getFieldStyle(editor.store, path) : {}
+  const mergedStyle = { ...fieldStyleToCss(fieldStyle), ...style }
+
+  const draftValue =
+    editor?.previewDraft?.path === path ? editor.previewDraft.value : undefined
+  const displayContent =
+    typeof draftValue === 'string' || typeof draftValue === 'number'
+      ? String(draftValue)
+      : children
+
   if (!editor?.isEditing) {
-    const fieldStyle = editor ? getFieldStyle(editor.store, path) : {}
-    const mergedStyle = { ...fieldStyleToCss(fieldStyle), ...style }
     return (
       <Tag className={className} style={mergedStyle}>
         {children}
@@ -44,8 +52,6 @@ export default function Editable({
     )
   }
 
-  const fieldStyle = getFieldStyle(editor.store, path)
-  const mergedStyle = { ...fieldStyleToCss(fieldStyle), ...style }
   const isActive = editor.activeField?.path === path
 
   return (
@@ -73,7 +79,7 @@ export default function Editable({
       tabIndex={0}
       aria-label={`Edit ${label}`}
     >
-      {children}
+      {displayContent}
       <span
         className={clsx(
           'absolute -right-2 -top-2 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-[#2563eb] text-white shadow-lg transition-opacity',

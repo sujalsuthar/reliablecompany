@@ -24,12 +24,21 @@ export interface ActiveField {
   label: string
 }
 
+export interface PreviewDraft {
+  path: string
+  value: unknown
+  arPath?: string
+  arValue?: string
+}
+
 interface EditorContextValue {
   store: CmsStore
   isEditing: boolean
   activeField: ActiveField | null
   isSaving: boolean
+  previewDraft: PreviewDraft | null
   setActiveField: (field: ActiveField | null) => void
+  setPreviewDraft: (draft: PreviewDraft | null) => void
   updateField: (path: string, value: unknown) => Promise<void>
   refreshStore: () => Promise<void>
   getFieldValue: (path: string) => unknown
@@ -61,11 +70,17 @@ export default function EditorProvider({
   isEditing = false,
 }: EditorProviderProps) {
   const [store, setStore] = useState(initialStore)
-  const [activeField, setActiveField] = useState<ActiveField | null>(null)
+  const [activeField, setActiveFieldState] = useState<ActiveField | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [previewDraft, setPreviewDraft] = useState<PreviewDraft | null>(null)
+
+  const setActiveField = useCallback((field: ActiveField | null) => {
+    setActiveFieldState(field)
+    if (!field) setPreviewDraft(null)
+  }, [])
 
   const refreshStore = useCallback(async () => {
-    const res = await fetch('/api/cms/editor/store')
+    const res = await fetch('/api/cms/editor/store', { credentials: 'include' })
     if (res.ok) {
       const data = (await res.json()) as { store: CmsStore }
       setStore(data.store)
@@ -78,20 +93,26 @@ export default function EditorProvider({
       const res = await fetch('/api/cms/editor/field', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ path, value }),
       })
-      if (res.ok) {
-        const data = (await res.json()) as { store: CmsStore }
-        setStore(data.store)
+      const data = (await res.json()) as { store?: CmsStore; error?: string }
+      if (!res.ok || !data.store) {
+        throw new Error(data.error ?? 'Failed to save field')
       }
+      setStore(data.store)
     } finally {
       setIsSaving(false)
     }
   }, [])
 
   const getFieldValue = useCallback(
-    (path: string) => resolveFieldValue(store, path),
-    [store],
+    (path: string) => {
+      if (previewDraft?.path === path) return previewDraft.value
+      if (previewDraft?.arPath === path) return previewDraft.arValue
+      return resolveFieldValue(store, path)
+    },
+    [previewDraft, store],
   )
 
   const value = useMemo(
@@ -100,12 +121,24 @@ export default function EditorProvider({
       isEditing,
       activeField,
       isSaving,
+      previewDraft,
       setActiveField,
+      setPreviewDraft,
       updateField,
       refreshStore,
       getFieldValue,
     }),
-    [store, isEditing, activeField, isSaving, updateField, refreshStore, getFieldValue],
+    [
+      store,
+      isEditing,
+      activeField,
+      isSaving,
+      previewDraft,
+      setActiveField,
+      updateField,
+      refreshStore,
+      getFieldValue,
+    ],
   )
 
   return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
