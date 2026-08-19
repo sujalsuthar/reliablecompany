@@ -1,5 +1,5 @@
 import { createInitialStore } from '@/lib/cms/init-store'
-import { SEED_PRIVACY_PAGE, SEED_TERMS_PAGE, SEED_WHY_STATS } from '@/lib/seed-data'
+import { SEED_PRIVACY_PAGE, SEED_TERMS_PAGE } from '@/lib/seed-data'
 import type {
   BlogPost,
   Campaign,
@@ -205,44 +205,6 @@ function migrateStore(store: CmsStore): CmsStore {
   return migrated
 }
 
-/** Resets Why Us header copy, stats, and removes duplicate homepage Why Us blocks. */
-function restoreWhyUsSection(store: CmsStore): CmsStore {
-  const initial = createInitialStore()
-  const sections = [...(store.homepageSections ?? [])]
-  let keptWhyUs = false
-  const homepageSections = sections
-    .filter((section) => {
-      if (section.type !== 'whyUs') return true
-      if (keptWhyUs) return false
-      keptWhyUs = true
-      return true
-    })
-    .map((section) =>
-      section.type === 'whyUs' ? { ...section, visible: true } : section,
-    )
-
-  if (!keptWhyUs) {
-    const servicesIndex = homepageSections.findIndex((section) => section.type === 'services')
-    const whyUsSection = createSectionInstance('whyUs')
-    if (servicesIndex >= 0) {
-      homepageSections.splice(servicesIndex + 1, 0, whyUsSection)
-    } else {
-      homepageSections.push(whyUsSection)
-    }
-  }
-
-  return {
-    ...store,
-    homepageSections,
-    sectionContent: {
-      ...store.sectionContent,
-      whyUs: { ...initial.sectionContent.whyUs },
-    },
-    whyStats: SEED_WHY_STATS.map((stat) => ({ ...stat })),
-    profileVersion: PROFILE_VERSION,
-  }
-}
-
 function migrateToV14(store: CmsStore): CmsStore {
   let next = store
 
@@ -275,62 +237,6 @@ function migrateToV14(store: CmsStore): CmsStore {
   return next
 }
 
-function applyCyberSecuritySeedMigration(store: CmsStore): CmsStore {
-  const initial = createInitialStore()
-  return {
-    ...initial,
-    profileVersion: PROFILE_VERSION,
-    enquiries: store.enquiries ?? [],
-    careerApplications: store.careerApplications ?? [],
-    campaignApplications: store.campaignApplications ?? [],
-    campaigns: initial.campaigns,
-    services: initial.services,
-    projects: initial.projects,
-    blogPosts: initial.blogPosts,
-    industries: initial.industries,
-    divisions: initial.divisions,
-    team: initial.team,
-    certifications: initial.certifications,
-    values: initial.values,
-    whyStats: initial.whyStats,
-    careers: initial.careers,
-    hero: initial.hero,
-    homepageSections: initial.homepageSections,
-    sectionContent: initial.sectionContent,
-    ctaBanner: initial.ctaBanner,
-    pageSeo: initial.pageSeo,
-    pageHeroImages: {
-      ...initial.pageHeroImages,
-      ...store.pageHeroImages,
-    },
-    pages: {
-      ...initial.pages,
-      privacy: store.pages?.privacy ?? initial.pages.privacy,
-      terms: store.pages?.terms ?? initial.pages.terms,
-    },
-    globalContent: {
-      ...initial.globalContent,
-      ...store.globalContent,
-      logoUrl: store.globalContent?.logoUrl || LOGO_PATH,
-      phone: store.globalContent?.phone || initial.globalContent.phone,
-      email: store.globalContent?.email || initial.globalContent.email,
-    },
-    navbar: {
-      ...initial.navbar,
-      ...store.navbar,
-      megaMenuImageUrl:
-        store.navbar?.megaMenuImageUrl || initial.navbar.megaMenuImageUrl,
-    },
-    footer: {
-      ...initial.footer,
-      ...store.footer,
-      certificationImageUrl:
-        store.footer?.certificationImageUrl ?? initial.footer.certificationImageUrl,
-    },
-    fieldStyles: store.fieldStyles ?? {},
-  }
-}
-
 async function persistStore(store: CmsStore) {
   setCachedStore(store)
   await writeRawStore(store)
@@ -342,6 +248,12 @@ export async function getStore(): Promise<CmsStore> {
 
   const raw = await readRawStore()
   if (!raw) {
+    const allowSeed = process.env.ALLOW_CMS_SEED === '1'
+    if (!allowSeed) {
+      throw new Error(
+        'CMS store is empty. Refusing to overwrite the database with seed data. Restore from MongoDB Atlas backup, or set ALLOW_CMS_SEED=1 only for a brand-new empty database.',
+      )
+    }
     const initial = createInitialStore()
     initial.profileVersion = PROFILE_VERSION
     await persistStore(initial)
@@ -352,16 +264,13 @@ export async function getStore(): Promise<CmsStore> {
 
   if ((store.profileVersion ?? 0) < PROFILE_VERSION) {
     const version = store.profileVersion ?? 0
-    if (version < 13) {
-      store = applyCyberSecuritySeedMigration(store)
-    } else {
-      if (version < 14) {
-        store = migrateToV14(store)
-      }
-      if (version < 15) {
-        store = restoreWhyUsSection(store)
-      }
+    // Never re-run the one-time cybersecurity seed wipe. That migration used to
+    // replace hero, services, images, and homepage copy whenever profileVersion
+    // was below 13 (including after a bad seed from disk).
+    if (version >= 13 && version < 14) {
+      store = migrateToV14(store)
     }
+    store = { ...store, profileVersion: PROFILE_VERSION }
     await persistStore(store)
     return store
   }

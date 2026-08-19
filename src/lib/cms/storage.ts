@@ -2,10 +2,10 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 import type { CmsStore } from '@/lib/cms/types'
-import { getDb, isMongoEnabled } from '@/lib/cms/mongodb'
+import { getDb, getMongoDbName, isMongoEnabled } from '@/lib/cms/mongodb'
 
 const STORE_PATH = path.join(process.cwd(), 'data', 'cms-store.json')
-const STORE_DOC_ID = 'main' as const
+export const STORE_DOC_ID = 'main' as const
 
 type CmsStoreDocument = {
   _id: typeof STORE_DOC_ID
@@ -14,6 +14,14 @@ type CmsStoreDocument = {
 }
 
 export { isMongoEnabled }
+
+export interface CmsStoreReadResult {
+  store: CmsStore | null
+  source: 'mongo' | 'disk' | 'empty'
+  dbName?: string
+  updatedAt?: string
+  error?: string
+}
 
 async function readStoreFromDisk(): Promise<CmsStore | null> {
   try {
@@ -29,17 +37,15 @@ async function writeStoreToDisk(store: CmsStore): Promise<void> {
   await fs.writeFile(STORE_PATH, JSON.stringify(store, null, 2), 'utf-8')
 }
 
-async function readStoreFromMongo(): Promise<CmsStore | null> {
-  try {
-    const db = await getDb()
-    const doc = await db
-      .collection<CmsStoreDocument>('cms_store')
-      .findOne({ _id: STORE_DOC_ID })
-    return doc?.data ?? null
-  } catch (error) {
-    console.error('[cms] MongoDB read failed:', error)
-    return null
-  }
+async function readStoreDocumentFromMongo(): Promise<{
+  data: CmsStore | null
+  updatedAt?: Date
+}> {
+  const db = await getDb()
+  const doc = await db
+    .collection<CmsStoreDocument>('cms_store')
+    .findOne({ _id: STORE_DOC_ID })
+  return { data: doc?.data ?? null, updatedAt: doc?.updatedAt }
 }
 
 async function writeStoreToMongo(store: CmsStore): Promise<void> {
@@ -58,20 +64,50 @@ async function writeStoreToMongo(store: CmsStore): Promise<void> {
   }
 }
 
-export async function readRawStore(): Promise<CmsStore | null> {
+/**
+ * Read-only inspect. Never seeds or overwrites MongoDB.
+ */
+export async function inspectCmsStore(): Promise<CmsStoreReadResult> {
   if (isMongoEnabled()) {
-    const fromMongo = await readStoreFromMongo()
-    if (fromMongo) return fromMongo
-
-    const fromDisk = await readStoreFromDisk()
-    if (fromDisk) {
-      try {
-        await writeStoreToMongo(fromDisk)
-      } catch (error) {
-        console.error('[cms] MongoDB seed from disk failed:', error)
+    try {
+      const { data, updatedAt } = await readStoreDocumentFromMongo()
+      return {
+        store: data,
+        source: data ? 'mongo' : 'empty',
+        dbName: getMongoDbName(),
+        updatedAt: updatedAt?.toISOString(),
       }
-      return fromDisk
+    } catch (error) {
+      return {
+        store: null,
+        source: 'empty',
+        dbName: getMongoDbName(),
+        error: error instanceof Error ? error.message : 'MongoDB read failed',
+      }
     }
+  }
+
+  const fromDisk = await readStoreFromDisk()
+  return { store: fromDisk, source: fromDisk ? 'disk' : 'empty' }
+}
+
+export async function readRawStore(): Promise<CmsStore | null> {
+  const inspected = await inspectCmsStore()
+
+  if (inspected.error) {
+    console.error('[cms] store read failed — refusing to seed over live data:', inspected.error)
+    throw new Error(inspected.error)
+  }
+
+  if (inspected.store) return inspected.store
+
+  // Mongo is configured but the document is missing. Never auto-write git seed
+  // into Atlas — that is how production CMS content gets wiped.
+  if (isMongoEnabled()) {
+    console.error(
+      `[cms] No cms_store document in database "${inspected.dbName}". ` +
+        'Will not seed from disk. Restore from Atlas backup or set ALLOW_CMS_SEED=1 only for a new empty project.',
+    )
     return null
   }
 

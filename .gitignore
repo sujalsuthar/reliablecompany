@@ -13,6 +13,9 @@ out
 build
 dist
 
+# Local CMS restore snapshots (never commit live dumps)
+data/cms-store-before-restore-*.json
+
 # environment
 .env.local
 .env*.local
