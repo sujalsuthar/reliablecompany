@@ -16,8 +16,9 @@ import { useLocale } from '@/components/providers/LocaleProvider'
 import { useNavOverlay } from '@/components/providers/NavOverlayProvider'
 import Button from '@/components/ui/Button'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
-import { DEFAULT_MEGA_MENU_IMAGE } from '@/lib/page-heroes'
+import { ENGINEERING_SITE_URL, NCA_ISO_BADGE_PATH } from '@/lib/brand'
 import type { NavbarContent } from '@/lib/cms/editor/types'
+import { DEFAULT_MEGA_MENU_IMAGE } from '@/lib/page-heroes'
 
 const defaultResources = [
   { label: 'Blog', href: '/blog' },
@@ -61,9 +62,15 @@ export default function NavbarClient({
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false)
   const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [scrollReady, setScrollReady] = useState(false)
   const { scrollY } = useScroll()
 
+  useEffect(() => {
+    setScrollReady(true)
+  }, [])
+
   useMotionValueEvent(scrollY, 'change', (value) => {
+    if (!scrollReady) return
     setScrolled(value > 20)
   })
 
@@ -148,11 +155,11 @@ export default function NavbarClient({
       >
         <div className="relative mx-auto max-w-[1400px] px-5 sm:px-8 lg:px-10">
           {/* Desktop */}
-          <div className="relative hidden h-[76px] items-center justify-between gap-8 lg:flex">
-            <Logo onClick={closeMobile} height={48} logoUrl={logoUrl} />
+          <div className="relative hidden h-[88px] items-center justify-between gap-6 lg:flex xl:gap-8">
+            <Logo onClick={closeMobile} height={52} logoUrl={logoUrl} />
 
             <nav
-              className="flex flex-1 items-center justify-center gap-7 xl:gap-9"
+              className="flex flex-1 items-center justify-center gap-5 xl:gap-8"
               aria-label="Main navigation"
             >
               {mainLinks.slice(0, 2).map((link) => (
@@ -193,6 +200,15 @@ export default function NavbarClient({
                 </button>
               </div>
 
+              <a
+                href={ENGINEERING_SITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="interactive whitespace-nowrap text-[15px] font-normal text-gray-800 transition-colors hover:text-[#2563eb]"
+              >
+                {messages.nav.engineering}
+              </a>
+
               <NavDropdown
                 label={messages.nav.resources}
                 items={[...resourcesItems]}
@@ -216,7 +232,16 @@ export default function NavbarClient({
               ))}
             </nav>
 
-            <div className="flex shrink-0 items-center gap-2.5">
+            <div className="flex shrink-0 items-center gap-2.5 xl:gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={NCA_ISO_BADGE_PATH}
+                alt="NCA Registered · ISO 27001 Certified"
+                width={220}
+                height={72}
+                className="hidden h-[52px] w-auto object-contain lg:block xl:h-[58px] 2xl:h-[64px]"
+              />
+
               <LanguageSwitcher size="xs" />
 
               <Link
@@ -254,19 +279,29 @@ export default function NavbarClient({
           </div>
 
           {/* Mobile */}
-          <div className="flex h-[72px] items-center justify-between lg:hidden">
+          <div className="flex h-[72px] items-center justify-between gap-3 lg:hidden">
             <Logo onClick={closeMobile} height={44} logoUrl={logoUrl} />
 
-            <button
-              type="button"
-              className="interactive inline-flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
-              onClick={() => setIsOpen(true)}
-              aria-expanded={isOpen}
-              aria-controls="mobile-nav"
-              aria-label={messages.nav.openMenu}
-            >
-              <Menu className="h-6 w-6" aria-hidden />
-            </button>
+            <div className="flex items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={NCA_ISO_BADGE_PATH}
+                alt="NCA Registered · ISO 27001 Certified"
+                width={140}
+                height={44}
+                className="h-9 w-auto object-contain"
+              />
+              <button
+                type="button"
+                className="interactive inline-flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
+                onClick={() => setIsOpen(true)}
+                aria-expanded={isOpen}
+                aria-controls="mobile-nav"
+                aria-label={messages.nav.openMenu}
+              >
+                <Menu className="h-6 w-6" aria-hidden />
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -283,14 +318,24 @@ export default function NavbarClient({
           >
             <div className="flex h-[72px] shrink-0 items-center justify-between border-b border-gray-100 px-5">
               <Logo onClick={closeMobile} height={40} logoUrl={logoUrl} />
-              <button
-                type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
-                onClick={closeMobile}
-                aria-label={messages.nav.closeMenu}
-              >
-                <X className="h-6 w-6" aria-hidden />
-              </button>
+              <div className="flex items-center gap-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={NCA_ISO_BADGE_PATH}
+                  alt="NCA Registered · ISO 27001 Certified"
+                  width={160}
+                  height={48}
+                  className="h-10 w-auto object-contain"
+                />
+                <button
+                  type="button"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-gray-700 hover:bg-gray-100"
+                  onClick={closeMobile}
+                  aria-label={messages.nav.closeMenu}
+                >
+                  <X className="h-6 w-6" aria-hidden />
+                </button>
+              </div>
             </div>
 
             <nav
@@ -334,6 +379,16 @@ export default function NavbarClient({
                   <ServicesMobileLinks onNavigate={closeMobile} />
                 </div>
               )}
+
+              <a
+                href={ENGINEERING_SITE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-[44px] items-center border-b border-gray-100 py-4 text-xl text-gray-900 hover:text-[#2563eb]"
+                onClick={closeMobile}
+              >
+                {messages.nav.engineering}
+              </a>
 
               <button
                 type="button"

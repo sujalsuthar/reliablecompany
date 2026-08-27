@@ -1,8 +1,8 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { usePathname } from 'next/navigation'
-import { type ReactNode, useRef } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 
 interface PageTransitionProps {
   children: ReactNode
@@ -10,14 +10,23 @@ interface PageTransitionProps {
 
 export default function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname()
-  const prefersReducedMotion = useReducedMotion()
   const visitedPaths = useRef(new Set<string>())
+  const [reduceMotion, setReduceMotion] = useState(false)
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const sync = () => setReduceMotion(media.matches)
+    sync()
+    media.addEventListener('change', sync)
+    return () => media.removeEventListener('change', sync)
+  }, [])
 
   const isFirstVisit = !visitedPaths.current.has(pathname)
   visitedPaths.current.add(pathname)
 
-  // First visit (incl. hard refresh) shows content immediately — no opacity:0 flash.
-  const animateRouteChange = !isFirstVisit && !prefersReducedMotion
+  // First visit shows content immediately — no opacity:0 flash.
+  // reduceMotion is client-only after mount to avoid hydration mismatch.
+  const animateRouteChange = !isFirstVisit && !reduceMotion
 
   return (
     <motion.div

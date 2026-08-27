@@ -4,6 +4,8 @@ export const LOGO_ALT = 'Reliable Company — شركة ريلايبل'
 export const COMPANY_PHONE = '+966 56 391 3902'
 export const COMPANY_EMAIL = 'info@reliablecompany.sa'
 export const COMPANY_WEBSITE = 'https://reliablecompany.sa'
+export const ENGINEERING_SITE_URL = 'https://engineering.reliablecompany.sa'
+export const NCA_ISO_BADGE_PATH = '/nca-iso-badge.png'
 export const COMPANY_FACEBOOK_URL =
   'https://www.facebook.com/profile.php?id=61591194992498&sk=about'
 export const COMPANY_ADDRESS =

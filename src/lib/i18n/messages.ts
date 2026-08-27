@@ -6,6 +6,7 @@ export type Messages = typeof en
 const en = {
   nav: {
     services: 'Services',
+    engineering: 'Engineering',
     resources: 'Resources',
     switchToArabic: 'عربي',
     switchToEnglish: 'English',
@@ -301,6 +302,7 @@ const en = {
 const ar: Messages = {
   nav: {
     services: 'الخدمات',
+    engineering: 'الهندسة',
     resources: 'الموارد',
     switchToArabic: 'عربي',
     switchToEnglish: 'English',

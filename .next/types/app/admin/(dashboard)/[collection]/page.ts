@@ -1,4 +1,4 @@
-// File: C:\FOR JAINISH\reliablecompany\reliable-engineering - Copy\src\app\admin\(dashboard)\[collection]\page.tsx
+// File: C:\releng\src\app\admin\(dashboard)\[collection]\page.tsx
 import * as entry from '../../../../../../src/app/admin/(dashboard)/[collection]/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -47,6 +47,7 @@ export default function NavbarFooterCanvas() {
               </Editable>
             ))}
             <span className="text-[15px] text-gray-800">Services ▾</span>
+            <span className="text-[15px] text-gray-800">Engineering</span>
             <span className="text-[15px] font-medium text-[#2563eb]">Resources ▾</span>
             {navbar.resourcesLinks.map((link, i) => (
               <Editable
