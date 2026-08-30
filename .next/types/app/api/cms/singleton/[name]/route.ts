@@ -1,4 +1,4 @@
-// File: C:\releng\src\app\api\cms\singleton\[name]\route.ts
+// File: C:\FOR JAINISH\reliablecompany\reliable-engineering - Copy\src\app\api\cms\singleton\[name]\route.ts
 import * as entry from '../../../../../../../src/app/api/cms/singleton/[name]/route.js'
 import type { NextRequest } from 'next/server.js'
 

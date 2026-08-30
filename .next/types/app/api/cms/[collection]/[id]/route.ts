@@ -1,4 +1,4 @@
-// File: C:\releng\src\app\api\cms\[collection]\[id]\route.ts
+// File: C:\FOR JAINISH\reliablecompany\reliable-engineering - Copy\src\app\api\cms\[collection]\[id]\route.ts
 import * as entry from '../../../../../../../src/app/api/cms/[collection]/[id]/route.js'
 import type { NextRequest } from 'next/server.js'
 

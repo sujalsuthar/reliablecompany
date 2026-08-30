@@ -16,7 +16,7 @@ import { useLocale } from '@/components/providers/LocaleProvider'
 import { useNavOverlay } from '@/components/providers/NavOverlayProvider'
 import Button from '@/components/ui/Button'
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher'
-import { ENGINEERING_SITE_URL, NCA_ISO_BADGE_PATH } from '@/lib/brand'
+import { ENGINEERING_SITE_URL, NCA_BADGE_PATH } from '@/lib/brand'
 import type { NavbarContent } from '@/lib/cms/editor/types'
 import { DEFAULT_MEGA_MENU_IMAGE } from '@/lib/page-heroes'
 
@@ -235,11 +235,11 @@ export default function NavbarClient({
             <div className="flex shrink-0 items-center gap-2.5 xl:gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={NCA_ISO_BADGE_PATH}
-                alt="NCA Registered · ISO 27001 Certified"
-                width={220}
-                height={72}
-                className="hidden h-[52px] w-auto object-contain lg:block xl:h-[58px] 2xl:h-[64px]"
+                src={NCA_BADGE_PATH}
+                alt="NCA Registered — مسجل لدى الهيئة الوطنية للأمن السيبراني"
+                width={180}
+                height={48}
+                className="hidden h-[44px] w-auto object-contain lg:block xl:h-[48px] 2xl:h-[52px]"
               />
 
               <LanguageSwitcher size="xs" />
@@ -285,11 +285,11 @@ export default function NavbarClient({
             <div className="flex items-center gap-2">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={NCA_ISO_BADGE_PATH}
-                alt="NCA Registered · ISO 27001 Certified"
-                width={140}
-                height={44}
-                className="h-9 w-auto object-contain"
+                src={NCA_BADGE_PATH}
+                alt="NCA Registered — مسجل لدى الهيئة الوطنية للأمن السيبراني"
+                width={120}
+                height={36}
+                className="h-8 w-auto max-w-[120px] object-contain sm:h-9 sm:max-w-[140px]"
               />
               <button
                 type="button"
@@ -321,11 +321,11 @@ export default function NavbarClient({
               <div className="flex items-center gap-2">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={NCA_ISO_BADGE_PATH}
-                  alt="NCA Registered · ISO 27001 Certified"
-                  width={160}
-                  height={48}
-                  className="h-10 w-auto object-contain"
+                  src={NCA_BADGE_PATH}
+                  alt="NCA Registered — مسجل لدى الهيئة الوطنية للأمن السيبراني"
+                  width={130}
+                  height={40}
+                  className="h-9 w-auto max-w-[130px] object-contain"
                 />
                 <button
                   type="button"
