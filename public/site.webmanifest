@@ -1,0 +1,21 @@
+{
+  "name": "Reliable Company",
+  "short_name": "Reliable",
+  "description": "Cybersecurity and VAPT services in Saudi Arabia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a4fa0",
+  "icons": [
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

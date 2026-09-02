@@ -42,7 +42,7 @@ export default async function Hero() {
       {backgroundImageUrl && (
         <Image
           src={backgroundImageUrl}
-          alt={hero.backgroundImage?.alt ?? ''}
+          alt={hero.backgroundImage?.alt ?? 'Reliable Company cybersecurity and VAPT services in Saudi Arabia'}
           fill
           priority
           className="object-cover opacity-45"

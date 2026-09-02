@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react'
 import DarkWebAssessmentForm from '@/components/campaigns/DarkWebAssessmentForm'
 import { getActiveCampaign } from '@/lib/cms/store'
 import { getLocale } from '@/lib/i18n/locale'
-import { BASE_URL } from '@/lib/seo'
+import { generateLocalizedMetadata } from '@/lib/seo'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
 export const revalidate = PUBLIC_REVALIDATE_SECONDS
@@ -61,11 +61,16 @@ const COPY = {
   },
 } as const
 
-export const metadata: Metadata = {
-  title: 'Free Dark Web Assessment | Reliable Company',
-  description:
-    'Request a free dark web assessment for your organization in Saudi Arabia. Discover leaked credentials and exposure risks before attackers exploit them.',
-  alternates: { canonical: `${BASE_URL}/dark-web-assessment` },
+export async function generateMetadata(): Promise<Metadata> {
+  return generateLocalizedMetadata({
+    title: 'Free Dark Web Assessment',
+    titleAr: 'تقييم مجاني للويب المظلم',
+    description:
+      'Request a free dark web assessment for your organization in Saudi Arabia. Discover leaked credentials and exposure risks before attackers exploit them.',
+    descriptionAr:
+      'اطلب تقييماً مجانياً للويب المظلم لمؤسستك في السعودية. اكتشف بيانات الاعتماد المسربة ومخاطر التعرض قبل أن يستغلها المهاجمون.',
+    path: '/dark-web-assessment',
+  })
 }
 
 export default async function DarkWebAssessmentPage() {

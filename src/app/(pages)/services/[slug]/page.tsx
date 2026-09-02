@@ -3,12 +3,14 @@ import { notFound } from 'next/navigation'
 
 import CTABannerSection from '@/components/sections/CTABannerSection'
 import ServiceDetailContent from '@/components/sections/ServiceDetailContent'
+import JsonLd from '@/components/seo/JsonLd'
 import PageHero from '@/components/ui/PageHero'
 import ServiceListingCard from '@/components/ui/ServiceListingCard'
 import { getServiceBySlug, getServices } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { getMessages } from '@/lib/i18n/messages'
 import { resolveServiceImages } from '@/lib/service-images'
+import { breadcrumbSchema, serviceSchema } from '@/lib/structured-data'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 import { generateLocalizedMetadata } from '@/lib/seo'
 
@@ -83,6 +85,21 @@ export default async function ServiceDetailPage({
 
   return (
     <>
+      <JsonLd
+        data={[
+          breadcrumbSchema(
+            breadcrumbs.map((item) => ({
+              name: item.label,
+              href: item.href,
+            })),
+          ),
+          serviceSchema({
+            name: service.title,
+            description: service.shortDescription ?? service.title,
+            path: `/services/${params.slug}`,
+          }),
+        ]}
+      />
       <PageHero
         title={service.title}
         description={service.shortDescription}

@@ -190,7 +190,7 @@ export default function ServiceDetailContent({
                 <div className="relative aspect-[4/5] overflow-hidden rounded-2xl shadow-[0_8px_40px_rgba(26,79,160,0.18)] lg:aspect-auto lg:min-h-[480px]">
                   <CmsImage
                     src={overviewImage}
-                    alt=""
+                    alt={`${service.title} service overview`}
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"

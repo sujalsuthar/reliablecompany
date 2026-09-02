@@ -33,7 +33,7 @@ export default async function Industries() {
                   <div className="relative h-36 w-full">
                     <CmsImage
                       src={industry.imageSrc}
-                      alt=""
+                    alt={`${industry.title} industry`}
                       fill
                       className="object-cover"
                       sizes="(max-width: 640px) 100vw, 33vw"

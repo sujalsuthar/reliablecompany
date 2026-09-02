@@ -4,9 +4,11 @@ import { notFound } from 'next/navigation'
 
 import CmsImage from '@/components/ui/CmsImage'
 import CmsPageHero from '@/components/ui/CmsPageHero'
+import JsonLd from '@/components/seo/JsonLd'
 import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { formatDate, getMessages } from '@/lib/i18n/messages'
+import { articleSchema, breadcrumbSchema } from '@/lib/structured-data'
 import { generateLocalizedMetadata } from '@/lib/seo'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
@@ -63,17 +65,37 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const body =
     locale === 'ar' && post.contentAr?.trim() ? post.contentAr : post.content
 
+  const breadcrumbs = [
+    { label: m.common.home, href: '/' },
+    { label: m.common.blog, href: '/blog' },
+    { label: post.title },
+  ]
+
   return (
     <>
+      <JsonLd
+        data={[
+          breadcrumbSchema(
+            breadcrumbs.map((item) => ({
+              name: item.label,
+              href: item.href,
+            })),
+          ),
+          articleSchema({
+            title: post.title,
+            description: post.excerpt ?? post.title,
+            path: `/blog/${params.slug}`,
+            datePublished: post.createdAt,
+            dateModified: post.updatedAt,
+            image: post.coverImageSrc ?? undefined,
+          }),
+        ]}
+      />
       <CmsPageHero
         pageKey="blog"
         title={post.title}
         description={post.excerpt}
-        breadcrumbs={[
-          { label: m.common.home, href: '/' },
-          { label: m.common.blog, href: '/blog' },
-          { label: post.title },
-        ]}
+        breadcrumbs={breadcrumbs}
       />
 
       <section className="section-pad bg-white">

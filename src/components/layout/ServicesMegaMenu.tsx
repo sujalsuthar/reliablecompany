@@ -50,7 +50,7 @@ export default function ServicesMegaMenu({
                   <>
                     <Image
                       src={imageUrl}
-                      alt=""
+                      alt="Cybersecurity services overview"
                       fill
                       className="object-cover object-center"
                       sizes="(max-width: 768px) 100vw, 400px"

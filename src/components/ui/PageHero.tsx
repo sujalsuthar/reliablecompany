@@ -37,7 +37,7 @@ export default function PageHero({
       {imageUrl && (
         <CmsImage
           src={imageUrl}
-          alt=""
+          alt={`${title} — Reliable Company`}
           fill
           priority
           className="object-cover"

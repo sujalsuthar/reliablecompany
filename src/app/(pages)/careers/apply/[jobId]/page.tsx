@@ -22,12 +22,15 @@ export async function generateMetadata({ params }: CareerApplyPageProps): Promis
   const job = await getCareerById(params.jobId)
   if (!job) return { title: 'Apply' }
 
-  return generateLocalizedMetadata({
-    title: `Apply — ${job.title}`,
-    description: `Submit your application for ${job.title} at Reliable Company.`,
-    path: `/careers/apply/${params.jobId}`,
-    absoluteTitle: true,
-  })
+  return {
+    ...(await generateLocalizedMetadata({
+      title: `Apply — ${job.title}`,
+      description: `Submit your application for ${job.title} at Reliable Company.`,
+      path: `/careers/apply/${params.jobId}`,
+      absoluteTitle: true,
+    })),
+    robots: { index: false, follow: false },
+  }
 }
 
 export default async function CareerApplyPage({ params }: CareerApplyPageProps) {

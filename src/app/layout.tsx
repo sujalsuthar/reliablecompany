@@ -12,7 +12,10 @@ import PageTransition from '@/components/ui/PageTransition'
 import { isRtl } from '@/lib/i18n/config'
 import { getLocale } from '@/lib/i18n/locale'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
-import { BASE_URL } from '@/lib/seo'
+import GoogleAnalytics from '@/components/seo/GoogleAnalytics'
+import JsonLd from '@/components/seo/JsonLd'
+import { localBusinessSchema, organizationSchema, websiteSchema } from '@/lib/structured-data'
+import { BASE_URL, DEFAULT_DESCRIPTION } from '@/lib/seo'
 
 import '@/styles/globals.css'
 
@@ -48,8 +51,37 @@ export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
     template: '%s | Reliable Company',
-    default: 'Reliable Company',
+    default: 'Reliable Company | Cyber Security & VAPT Saudi Arabia',
   },
+  description: DEFAULT_DESCRIPTION,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+      'max-video-preview': -1,
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    alternateLocale: ['ar_SA'],
+    siteName: 'Reliable Company',
+    title: 'Reliable Company | Cyber Security & VAPT Saudi Arabia',
+    description: DEFAULT_DESCRIPTION,
+    url: BASE_URL,
+    images: [{ url: '/logo.png', width: 512, height: 512, alt: 'Reliable Company' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Reliable Company | Cyber Security & VAPT Saudi Arabia',
+    description: DEFAULT_DESCRIPTION,
+    images: ['/logo.png'],
+  },
+  manifest: '/site.webmanifest',
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -58,6 +90,7 @@ export const metadata: Metadata = {
     ],
     shortcut: '/favicon.png',
     apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+    other: [{ rel: 'icon', url: '/android-chrome-512x512.png', sizes: '512x512' }],
   },
 }
 
@@ -81,6 +114,8 @@ export default async function RootLayout({
         }`}
         data-locale={locale}
       >
+        <JsonLd data={[organizationSchema(), websiteSchema(), localBusinessSchema()]} />
+        <GoogleAnalytics />
         <LocaleProvider locale={locale}>
           <NavOverlayProvider>
             <Navbar />

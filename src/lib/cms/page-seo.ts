@@ -52,14 +52,14 @@ export function createDefaultPageSeo(): PageSeoMap {
       key: 'home',
       label: 'Homepage',
       path: '/',
-      seoTitle: 'Reliable Company | Cyber Security & Penetration Testing Saudi Arabia',
-      seoTitleAlt: 'Professional VAPT & Cybersecurity Services — Saudi Arabia',
+      seoTitle: 'Cyber Security & VAPT Services in Saudi Arabia',
+      seoTitleAlt: 'Reliable Company — Cybersecurity & Penetration Testing',
       seoDescription:
-        'Reliable Company provides professional Vulnerability Assessment and Penetration Testing (VAPT), web application security testing, network security assessment, and cybersecurity consulting across Saudi Arabia.',
+        'ISO 27001 certified cybersecurity company in Saudi Arabia. Network VAPT, web app penetration testing, mobile security, NCA ECC compliance & consulting.',
       seoDescriptionAlt:
-        'Cybersecurity and VAPT excellence — protecting applications and infrastructure through real-world security testing in KSA.',
+        'Professional VAPT and cybersecurity services protecting Saudi organizations through real-world security testing and compliance support.',
       seoKeywords:
-        'cyber security, penetration testing, VAPT, Saudi Arabia, Reliable Company, web application security, network security, ISO 27001',
+        'cyber security, penetration testing, VAPT, Saudi Arabia, Reliable Company, web application security, network security, NCA ECC, ISO 27001',
     },
     about: {
       key: 'about',

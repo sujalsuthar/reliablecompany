@@ -9,11 +9,27 @@ import { getSiteUrl } from '@/lib/site-url'
 const BASE_URL = getSiteUrl()
 const SITE_NAME = 'Reliable Company'
 const SITE_NAME_AR = 'شركة ريلايبل'
-const DEFAULT_OG_IMAGE = '/og-default.png'
+const DEFAULT_OG_IMAGE = '/logo.png'
 const DEFAULT_DESCRIPTION =
-  'Reliable Company provides professional Vulnerability Assessment and Penetration Testing (VAPT), web application security testing, and cybersecurity consulting across Saudi Arabia.'
+  'ISO 27001 certified cybersecurity company in Saudi Arabia offering VAPT, web app penetration testing, network security, and NCA compliance consulting.'
 const DEFAULT_DESCRIPTION_AR =
-  'تقدم شركة ريلايبل خدمات تقييم الثغرات واختبار الاختراق (VAPT) واختبار أمان تطبيقات الويب واستشارات الأمن السيبراني في المملكة العربية السعودية.'
+  'شركة أمن سيبراني معتمدة ISO 27001 في السعودية — تقييم الثغرات، اختبار الاختراق، أمان الشبكات، والامتثال لمتطلبات الهيئة الوطنية للأمن السيبراني.'
+
+const META_TITLE_MAX = 60
+const META_DESCRIPTION_MAX = 160
+
+function truncateAtWord(text: string, maxLength: number): string {
+  const trimmed = text.trim()
+  if (trimmed.length <= maxLength) return trimmed
+
+  const slice = trimmed.slice(0, maxLength)
+  const lastSpace = slice.lastIndexOf(' ')
+  if (lastSpace > maxLength * 0.6) {
+    return `${slice.slice(0, lastSpace).trim()}…`
+  }
+
+  return `${slice.trim()}…`
+}
 
 export interface SEOOptions {
   title: string
@@ -56,12 +72,17 @@ export function generateMetadata(options: SEOOptions): Metadata {
   const primaryDescription = (isAr ? descriptionAr : description)?.trim() ?? ''
   const altDescription = (isAr ? descriptionAltAr : descriptionAlt)?.trim() ?? ''
 
-  const resolvedTitle = primaryTitle || altTitle
-  const resolvedDescription =
-    primaryDescription || altDescription || (isAr ? DEFAULT_DESCRIPTION_AR : DEFAULT_DESCRIPTION)
+  const resolvedTitle = truncateAtWord(primaryTitle || altTitle, META_TITLE_MAX)
+  const resolvedDescription = truncateAtWord(
+    primaryDescription || altDescription || (isAr ? DEFAULT_DESCRIPTION_AR : DEFAULT_DESCRIPTION),
+    META_DESCRIPTION_MAX,
+  )
   const resolvedKeywords = (isAr && keywordsAr?.trim() ? keywordsAr : keywords)?.trim()
-  const resolvedOgTitle = altTitle || primaryTitle
-  const resolvedOgDescription = altDescription || primaryDescription || resolvedDescription
+  const resolvedOgTitle = truncateAtWord(altTitle || primaryTitle, META_TITLE_MAX)
+  const resolvedOgDescription = truncateAtWord(
+    altDescription || primaryDescription || resolvedDescription,
+    META_DESCRIPTION_MAX,
+  )
   const siteName = isAr ? SITE_NAME_AR : SITE_NAME
 
   const canonicalPath = path.startsWith('/') ? path : `/${path}`
@@ -75,11 +96,6 @@ export function generateMetadata(options: SEOOptions): Metadata {
     keywords: resolvedKeywords,
     alternates: {
       canonical: canonicalPath,
-      languages: {
-        en: canonicalUrl,
-        ar: canonicalUrl,
-        'x-default': canonicalUrl,
-      },
     },
     openGraph: {
       title: openGraphTitle,
