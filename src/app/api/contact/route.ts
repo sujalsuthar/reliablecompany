@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { addEnquiry } from '@/lib/cms/store'
+import { sendInfoMail } from '@/lib/mail'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 import { checkRateLimit, rateLimitResponse } from '@/lib/security/rate-limit'
 import { getClientIp } from '@/lib/security/request'
@@ -133,17 +134,27 @@ export async function POST(request: NextRequest) {
       message: trimField(body.message, LIMITS.message),
     })
 
-    void sendWhatsAppNotification(
-      [
-        'New contact enquiry — Reliable Company',
-        `Name: ${trimField(body.fullName, LIMITS.fullName)}`,
-        `Email: ${trimField(body.email, LIMITS.email)}`,
-        `Phone: ${trimField(body.phone, LIMITS.phone)}`,
-        `City: ${body.city!.trim()}`,
-        `Service: ${body.service!.trim()}`,
-        `Message: ${trimField(body.message, LIMITS.message)}`,
-      ].join('\n'),
-    )
+    const notificationText = [
+      'New contact enquiry — Reliable Company',
+      `Name: ${trimField(body.fullName, LIMITS.fullName)}`,
+      `Email: ${trimField(body.email, LIMITS.email)}`,
+      `Phone: ${trimField(body.phone, LIMITS.phone)}`,
+      body.companyName ? `Company: ${trimField(body.companyName, LIMITS.companyName)}` : '',
+      `City: ${body.city!.trim()}`,
+      `Service: ${body.service!.trim()}`,
+      `Division: ${trimField(body.division, LIMITS.division)}`,
+      '',
+      'Message:',
+      trimField(body.message, LIMITS.message),
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    void sendWhatsAppNotification(notificationText)
+
+    void sendInfoMail('New contact enquiry — Reliable Company', notificationText, {
+      replyTo: trimField(body.email, LIMITS.email),
+    })
 
     return NextResponse.json({ success: true })
   } catch {

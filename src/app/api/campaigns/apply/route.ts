@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { addCampaignApplication, getCollectionItem } from '@/lib/cms/store'
+import { sendInfoMail } from '@/lib/mail'
 import { checkRateLimit, rateLimitResponse } from '@/lib/security/rate-limit'
 import { getClientIp } from '@/lib/security/request'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
@@ -125,19 +126,23 @@ export async function POST(request: NextRequest) {
       message,
     })
 
-    void sendWhatsAppNotification(
-      [
-        'New campaign application — Reliable Company',
-        `Campaign: ${campaign.name}`,
-        `Name: ${fullName}`,
-        `Email: ${email}`,
-        `Company: ${companyName}`,
-        `Domain: ${domain}`,
-        message ? `Context: ${message}` : '',
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    )
+    const notificationText = [
+      'New campaign application — Reliable Company',
+      `Campaign: ${campaign.name}`,
+      `Name: ${fullName}`,
+      `Email: ${email}`,
+      `Company: ${companyName}`,
+      `Domain: ${domain}`,
+      message ? `Context: ${message}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n')
+
+    void sendWhatsAppNotification(notificationText)
+
+    void sendInfoMail(`Campaign application: ${campaign.name}`, notificationText, {
+      replyTo: email,
+    })
 
     return NextResponse.json({ success: true })
   } catch {

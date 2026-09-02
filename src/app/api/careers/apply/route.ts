@@ -7,6 +7,7 @@ import { COMPANY_EMAIL } from '@/lib/brand'
 import { checkRateLimit, rateLimitResponse } from '@/lib/security/rate-limit'
 import { getClientIp } from '@/lib/security/request'
 import { validateResumeUpload } from '@/lib/security/upload'
+import { sendHrMail } from '@/lib/mail'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 export const runtime = 'nodejs'
@@ -188,15 +189,34 @@ export async function POST(request: NextRequest) {
       message: coverLetter,
     })
 
-    void sendWhatsAppNotification(
-      [
-        'New career application — Reliable Company',
-        `Position: ${position || job.title}`,
-        `Name: ${fullName}`,
-        `Email: ${email}`,
-        `Phone: ${phone}`,
-      ].join('\n'),
-    )
+    const notificationText = [
+      'New career application — Reliable Company',
+      `Position: ${position || job.title}`,
+      `Name: ${fullName}`,
+      `Email: ${email}`,
+      `Phone: ${phone}`,
+      city ? `City: ${city}` : '',
+      '',
+      'Cover letter:',
+      coverLetter,
+      '',
+      `Resume: ${resumeUrl}`,
+    ]
+      .filter((line) => line !== undefined)
+      .join('\n')
+
+    void sendWhatsAppNotification(notificationText)
+
+    void sendHrMail(`Career application: ${position || job.title}`, notificationText, {
+      replyTo: email,
+      attachments: [
+        {
+          filename: resumeFile!.name,
+          content: buffer,
+          contentType: validation.mime,
+        },
+      ],
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {

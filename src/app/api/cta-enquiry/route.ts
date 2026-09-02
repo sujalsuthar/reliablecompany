@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { addEnquiry } from '@/lib/cms/store'
+import { sendInfoMail } from '@/lib/mail'
 import { checkRateLimit, rateLimitResponse } from '@/lib/security/rate-limit'
 import { getClientIp } from '@/lib/security/request'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
@@ -84,13 +85,17 @@ export async function POST(request: NextRequest) {
       message: `Consultation requested via ${sourceLabel.toLowerCase()}.`,
     })
 
-    void sendWhatsAppNotification(
-      [
-        'New CTA enquiry — Reliable Company',
-        `Source: ${sourceLabel}`,
-        `Email: ${email}`,
-      ].join('\n'),
-    )
+    const notificationText = [
+      'New CTA enquiry — Reliable Company',
+      `Source: ${sourceLabel}`,
+      `Email: ${email}`,
+    ].join('\n')
+
+    void sendWhatsAppNotification(notificationText)
+
+    void sendInfoMail('New CTA enquiry — Reliable Company', notificationText, {
+      replyTo: email,
+    })
 
     return NextResponse.json({ success: true })
   } catch {
