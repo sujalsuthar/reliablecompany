@@ -10,7 +10,7 @@ import BilingualField from '@/components/admin/BilingualField'
 import ImageUploadField from '@/components/admin/ImageUploadField'
 import StorageStatusBanner from '@/components/admin/StorageStatusBanner'
 import type { CollectionConfig } from '@/lib/cms/collections'
-import { itemToFormValues } from '@/lib/cms/transform'
+import { itemToFormValues, getCollectionFormDefaults } from '@/lib/cms/transform'
 
 interface CollectionFormProps {
   config: CollectionConfig
@@ -25,6 +25,11 @@ export default function CollectionForm({ config, pathKey, itemId }: CollectionFo
   const [isLoading, setIsLoading] = useState(!isNew)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (itemId) return
+    setValues(getCollectionFormDefaults(config.key))
+  }, [config.key, itemId])
 
   useEffect(() => {
     if (!itemId) return

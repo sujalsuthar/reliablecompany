@@ -19,6 +19,7 @@ const staticRoutes = [
   '/privacy',
   '/terms',
   '/dark-web-assessment',
+  '/campaign-apply',
 ] as const
 
 export const revalidate = 60

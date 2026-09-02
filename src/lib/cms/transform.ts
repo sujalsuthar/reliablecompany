@@ -304,5 +304,49 @@ export function formValuesToItem(collection: CmsCollection, values: Record<strin
     }
   }
 
+  if (collection === 'campaigns') {
+    const name = String(values.name ?? 'Campaign').trim()
+    const title = String(values.title ?? name).trim()
+    return {
+      _id: values._id,
+      name,
+      status: values.status === 'inactive' ? 'inactive' : 'active',
+      order: Number(values.order) || 1,
+      showDelayMs: Number(values.showDelayMs) || 2500,
+      badge: String(values.badge ?? 'Limited-Time Offer'),
+      badgeAr: values.badgeAr,
+      title,
+      titleAr: values.titleAr,
+      subtitle: String(values.subtitle ?? 'For organizations in Saudi Arabia'),
+      subtitleAr: values.subtitleAr,
+      body: String(values.body ?? ''),
+      bodyAr: values.bodyAr,
+      ctaText: String(values.ctaText ?? 'Learn More'),
+      ctaTextAr: values.ctaTextAr,
+      applyPagePath: String(values.applyPagePath || '/campaign-apply'),
+      floatingLabel: String(values.floatingLabel ?? 'FREE CAMPAIGN'),
+      floatingLabelAr: values.floatingLabelAr,
+      floatingText: String(values.floatingText ?? title),
+      floatingTextAr: values.floatingTextAr,
+    }
+  }
+
   return data
+}
+
+export function getCollectionFormDefaults(
+  collection: CmsCollection,
+): Record<string, unknown> {
+  if (collection !== 'campaigns') return {}
+
+  return {
+    status: 'active',
+    order: 1,
+    showDelayMs: 2500,
+    applyPagePath: '/campaign-apply',
+    badge: 'Limited-Time Offer',
+    floatingLabel: 'FREE CAMPAIGN',
+    ctaText: 'Learn More',
+    subtitle: 'For organizations in Saudi Arabia',
+  }
 }

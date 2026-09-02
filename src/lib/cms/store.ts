@@ -191,6 +191,14 @@ function migrateStore(store: CmsStore): CmsStore {
   }
   if (!Array.isArray(store.campaigns) || store.campaigns.length === 0) {
     migrated.campaigns = initial.campaigns
+  } else {
+    migrated.campaigns = store.campaigns.map((campaign) => ({
+      ...campaign,
+      status: campaign.status === 'inactive' ? 'inactive' : 'active',
+      applyPagePath: campaign.applyPagePath || '/campaign-apply',
+      order: campaign.order ?? 1,
+      showDelayMs: campaign.showDelayMs ?? 2500,
+    }))
   }
 
   if ((store.legalVersion ?? 0) < LEGAL_VERSION) {
@@ -351,6 +359,18 @@ export async function getCollectionItem<K extends CmsCollection>(
   return (items.find((item) => item._id === id) as CollectionItemMap[K]) ?? null
 }
 
+function normalizeActiveCampaigns(campaigns: Campaign[], activeId: string): Campaign[] {
+  return campaigns.map((campaign) => {
+    if (campaign._id === activeId) {
+      return { ...campaign, status: 'active' }
+    }
+    if (campaign.status === 'active') {
+      return { ...campaign, status: 'inactive' }
+    }
+    return campaign
+  })
+}
+
 export async function createCollectionItem<K extends CmsCollection>(
   collection: K,
   data: Omit<CollectionItemMap[K], '_id'> & { _id?: string },
@@ -361,6 +381,11 @@ export async function createCollectionItem<K extends CmsCollection>(
   }
   const item = { ...data, _id: data._id ?? newId(collection) } as CollectionItemMap[K]
   ;(store[collection] as CollectionItemMap[K][]).push(item)
+
+  if (collection === 'campaigns' && (item as Campaign).status === 'active') {
+    store.campaigns = normalizeActiveCampaigns(store.campaigns, item._id)
+  }
+
   await saveStore(store)
   return item
 }
@@ -376,6 +401,11 @@ export async function updateCollectionItem<K extends CmsCollection>(
   if (index === -1) return null
 
   items[index] = { ...items[index], ...data, _id: id }
+
+  if (collection === 'campaigns' && (items[index] as Campaign).status === 'active') {
+    store.campaigns = normalizeActiveCampaigns(store.campaigns as Campaign[], id)
+  }
+
   await saveStore(store)
   return items[index]
 }
@@ -596,10 +626,15 @@ export async function addCampaignApplication(
   })
 }
 
-export async function getActiveCampaign(): Promise<Campaign | null> {
+export async function getActiveCampaign(applyPagePath?: string): Promise<Campaign | null> {
   const store = await getStore()
   const active = store.campaigns
     .filter((campaign) => campaign.status === 'active')
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+  if (applyPagePath) {
+    return active.find((campaign) => campaign.applyPagePath === applyPagePath) ?? null
+  }
+
   return active[0] ?? null
 }
