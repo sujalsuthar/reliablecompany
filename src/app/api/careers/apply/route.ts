@@ -7,7 +7,7 @@ import { COMPANY_EMAIL } from '@/lib/brand'
 import { checkRateLimit, rateLimitResponse } from '@/lib/security/rate-limit'
 import { getClientIp } from '@/lib/security/request'
 import { validateResumeUpload } from '@/lib/security/upload'
-import { sendHrMail } from '@/lib/mail'
+import { isSmtpConfigured, sendHrMail } from '@/lib/mail'
 import { sendWhatsAppNotification } from '@/lib/whatsapp'
 
 export const runtime = 'nodejs'
@@ -28,24 +28,37 @@ function trim(value: string | null | undefined, max: number): string {
   return (value ?? '').trim().slice(0, max)
 }
 
-/** FormData file values can be File or Blob depending on the Node/runtime. */
-function asResumeFile(value: FormDataEntryValue | null): File | null {
+interface ResumeUpload {
+  name: string
+  size: number
+  type: string
+  buffer: Buffer
+}
+
+/** Read resume from FormData without relying on the File constructor. */
+async function readResumeUpload(
+  value: FormDataEntryValue | null,
+): Promise<ResumeUpload | null> {
   if (!value || typeof value === 'string') return null
 
-  if (typeof File !== 'undefined' && value instanceof File) {
-    if (!value.name || value.size <= 0) return null
-    return value
-  }
+  const blob = value as Blob & { name?: string }
+  if (typeof blob.arrayBuffer !== 'function') return null
 
-  if (typeof Blob !== 'undefined' && value instanceof Blob && value.size > 0) {
-    const named = value as Blob & { name?: string }
-    const name = named.name?.trim() || 'resume.pdf'
-    return new File([value], name, {
-      type: value.type || 'application/octet-stream',
-    })
-  }
+  const buffer = Buffer.from(await blob.arrayBuffer())
+  if (buffer.length <= 0) return null
 
-  return null
+  const name =
+    (typeof blob.name === 'string' && blob.name.trim()) ||
+    (typeof (value as { name?: string }).name === 'string' &&
+      (value as { name: string }).name.trim()) ||
+    'resume.pdf'
+
+  return {
+    name,
+    size: buffer.length,
+    type: blob.type || 'application/octet-stream',
+    buffer,
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -85,10 +98,14 @@ export async function POST(request: NextRequest) {
     const email = trim(formData.get('email') as string | null, LIMITS.email)
     const phone = trim(formData.get('phone') as string | null, LIMITS.phone)
     const city = trim(formData.get('city') as string | null, LIMITS.city)
-    const coverLetter = trim(formData.get('coverLetter') as string | null, LIMITS.coverLetter)
+    const coverLetter = trim(
+      formData.get('coverLetter') as string | null,
+      LIMITS.coverLetter,
+    )
     const position = trim(formData.get('position') as string | null, LIMITS.position)
-    const consent = formData.get('consent') === 'true' || formData.get('consent') === 'on'
-    const resumeFile = asResumeFile(formData.get('resume'))
+    const consent =
+      formData.get('consent') === 'true' || formData.get('consent') === 'on'
+    const resume = await readResumeUpload(formData.get('resume'))
 
     const errors: Record<string, string> = {}
 
@@ -104,7 +121,7 @@ export async function POST(request: NextRequest) {
       errors.coverLetter = 'Cover letter must be at least 10 characters.'
     }
     if (!consent) errors.consent = 'You must agree to data processing.'
-    if (!resumeFile) {
+    if (!resume) {
       errors.resume = 'Resume is required.'
     }
 
@@ -112,18 +129,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, errors }, { status: 400 })
     }
 
-    const store = await getStore()
-    const job = store.careers.find((c) => c._id === careerId && c.status === 'active')
-    if (!job) {
-      return NextResponse.json(
-        { success: false, error: 'This position is no longer available.' },
-        { status: 404 },
-      )
+    let jobTitle = position
+    try {
+      const store = await getStore()
+      const job = store.careers.find((c) => c._id === careerId && c.status === 'active')
+      if (!job) {
+        return NextResponse.json(
+          { success: false, error: 'This position is no longer available.' },
+          { status: 404 },
+        )
+      }
+      jobTitle = position || job.title
+    } catch (error) {
+      console.error('[careers] store lookup failed:', error)
+      // Still accept the application if CMS is briefly unavailable
+      jobTitle = position || 'Career application'
     }
 
-    const bytes = await resumeFile!.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const validation = validateResumeUpload(resumeFile!, buffer)
+    const validation = validateResumeUpload(
+      { name: resume!.name, size: resume!.size },
+      resume!.buffer,
+    )
 
     if (!validation.ok) {
       return NextResponse.json(
@@ -145,7 +171,11 @@ export async function POST(request: NextRequest) {
     let resumeUrl: string
 
     try {
-      const saved = await saveResumeFile(buffer, validation.mime, resumeFile!.name)
+      const saved = await saveResumeFile(
+        resume!.buffer,
+        validation.mime,
+        resume!.name,
+      )
       resumeUrl = saved.url
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Resume upload failed'
@@ -177,21 +207,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    await addCareerApplication({
-      careerId,
-      fullName,
-      email,
-      phone,
-      city: city || undefined,
-      position: position || job.title,
-      resumeUrl,
-      resumeFileName: resumeFile!.name,
-      message: coverLetter,
-    })
+    const absoluteResumeUrl = resumeUrl.startsWith('http')
+      ? resumeUrl
+      : `${(process.env.SITE_URL || 'https://reliablecompany.sa').replace(/\/$/, '')}${resumeUrl}`
+
+    try {
+      await addCareerApplication({
+        careerId,
+        fullName,
+        email,
+        phone,
+        city: city || undefined,
+        position: jobTitle,
+        resumeUrl,
+        resumeFileName: resume!.name,
+        message: coverLetter,
+      })
+    } catch (error) {
+      console.error('[careers] save application failed:', error)
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Could not save application. Please try again, or email ${COMPANY_EMAIL}.`,
+        },
+        { status: 500 },
+      )
+    }
 
     const notificationText = [
       'New career application — Reliable Company',
-      `Position: ${position || job.title}`,
+      `Position: ${jobTitle}`,
       `Name: ${fullName}`,
       `Email: ${email}`,
       `Phone: ${phone}`,
@@ -200,23 +245,36 @@ export async function POST(request: NextRequest) {
       'Cover letter:',
       coverLetter,
       '',
-      `Resume: ${resumeUrl}`,
+      `Resume: ${absoluteResumeUrl}`,
     ]
-      .filter((line) => line !== undefined)
+      .filter((line) => line !== undefined && line !== '')
       .join('\n')
 
     void sendWhatsAppNotification(notificationText)
 
-    void sendHrMail(`Career application: ${position || job.title}`, notificationText, {
-      replyTo: email,
-      attachments: [
+    // Await email so SMTP errors are logged while the request is still alive.
+    // Application is already saved — do not fail the user if mail fails.
+    if (isSmtpConfigured()) {
+      const mailed = await sendHrMail(
+        `Career application: ${jobTitle}`,
+        notificationText,
         {
-          filename: resumeFile!.name,
-          content: buffer,
-          contentType: validation.mime,
+          replyTo: email,
+          attachments: [
+            {
+              filename: resume!.name,
+              content: resume!.buffer,
+              contentType: validation.mime,
+            },
+          ],
         },
-      ],
-    })
+      )
+      if (!mailed) {
+        console.error('[careers] HR email failed after successful application save')
+      }
+    } else {
+      console.warn('[careers] SMTP not configured — application saved without email')
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

@@ -176,14 +176,14 @@ export default function CareerApplyForm({ job }: CareerApplyFormProps) {
             <p className="mt-5 text-base leading-relaxed text-white/75">{job.description}</p>
           )}
 
-          {job.responsibilities && job.responsibilities.length > 0 && (
+          {Array.isArray(job.responsibilities) && job.responsibilities.length > 0 && (
             <div className="mt-8">
               <p className="text-sm font-semibold uppercase tracking-wide text-sky-300">
                 {t.responsibilities}
               </p>
               <ul className="mt-4 space-y-3">
-                {job.responsibilities.map((item) => (
-                  <li key={item} className="flex gap-3 text-sm text-white/85">
+                {job.responsibilities.map((item, index) => (
+                  <li key={`${index}-${item}`} className="flex gap-3 text-sm text-white/85">
                     <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-sky-400" aria-hidden />
                     <span>{item}</span>
                   </li>

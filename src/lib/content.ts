@@ -258,20 +258,30 @@ export async function getBlogPostBySlug(slug: string): Promise<BlogPost | null> 
 
 export async function getActiveCareers(): Promise<Career[]> {
   return withLocale(async (locale) => {
-    const store = await getStore()
-    const careers = store.careers
-      .filter((c) => c.status === 'active')
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    return localizeCareers(careers, locale)
+    try {
+      const store = await getStore()
+      const careers = store.careers
+        .filter((c) => c.status === 'active')
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      return localizeCareers(careers, locale)
+    } catch (error) {
+      console.error('[content] getActiveCareers failed:', error)
+      return []
+    }
   })
 }
 
 export async function getCareerById(id: string): Promise<Career | null> {
   return withLocale(async (locale) => {
-    const store = await getStore()
-    const career = store.careers.find((c) => c._id === id && c.status === 'active')
-    if (!career) return null
-    return localizeCareers([career], locale)[0]
+    try {
+      const store = await getStore()
+      const career = store.careers.find((c) => c._id === id && c.status === 'active')
+      if (!career) return null
+      return localizeCareers([career], locale)[0]
+    } catch (error) {
+      console.error('[content] getCareerById failed:', error)
+      return null
+    }
   })
 }
 

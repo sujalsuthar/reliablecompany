@@ -1,11 +1,16 @@
 import nodemailer from 'nodemailer'
 import type Mail from 'nodemailer/lib/mailer'
+import type SMTPTransport from 'nodemailer/lib/smtp-transport'
 
 export const HR_EMAIL = process.env.MAIL_HR?.trim() || 'hr@reliablecompany.sa'
 export const INFO_EMAIL = process.env.MAIL_INFO?.trim() || 'info@reliablecompany.sa'
 
 function smtpFromAddress(): string {
-  return process.env.SMTP_FROM?.trim() || process.env.SMTP_USER?.trim() || 'smtp@reliablecompany.sa'
+  return (
+    process.env.SMTP_FROM?.trim() ||
+    process.env.SMTP_USER?.trim() ||
+    'smtp@reliablecompany.sa'
+  )
 }
 
 export function isSmtpConfigured(): boolean {
@@ -18,9 +23,9 @@ export function isSmtpConfigured(): boolean {
 
 function createTransporter() {
   const port = Number(process.env.SMTP_PORT || 587)
-  const secure = process.env.SMTP_SECURE === 'true'
+  const secure = process.env.SMTP_SECURE === 'true' || port === 465
 
-  return nodemailer.createTransport({
+  const options: SMTPTransport.Options = {
     host: process.env.SMTP_HOST,
     port,
     secure,
@@ -29,7 +34,17 @@ function createTransporter() {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-  })
+    tls: {
+      minVersion: 'TLSv1.2',
+      // Office 365 on some hosts needs this; still encrypts via STARTTLS
+      rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== '0',
+    },
+    connectionTimeout: 20_000,
+    greetingTimeout: 20_000,
+    socketTimeout: 30_000,
+  }
+
+  return nodemailer.createTransport(options)
 }
 
 function escapeHtml(value: string): string {
@@ -78,7 +93,8 @@ export async function sendMail(options: {
 
   try {
     const transporter = createTransporter()
-    await transporter.sendMail(mailOptions)
+    const info = await transporter.sendMail(mailOptions)
+    console.log('[mail] sent OK to', options.to, 'id=', info.messageId)
     return true
   } catch (error) {
     console.error('[mail] send failed:', error)

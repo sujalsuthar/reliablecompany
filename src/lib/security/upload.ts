@@ -100,14 +100,15 @@ function detectResumeMime(buffer: Buffer): string | null {
 }
 
 export function validateResumeUpload(
-  file: File,
+  file: { name: string; size: number },
   buffer: Buffer,
 ): UploadValidationResult | UploadValidationError {
-  if (file.size > MAX_RESUME_BYTES) {
+  const size = file.size || buffer.length
+  if (size > MAX_RESUME_BYTES) {
     return { ok: false, error: 'Resume exceeds the 10 MB size limit.' }
   }
 
-  if (file.size === 0) {
+  if (size === 0 || buffer.length === 0) {
     return { ok: false, error: 'Empty file.' }
   }
 
