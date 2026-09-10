@@ -45,6 +45,7 @@ import {
   localizeWhyStats,
 } from '@/lib/i18n/localize'
 import { mergePageSeo, type PageSeoEntry, type PageSeoKey } from '@/lib/cms/page-seo'
+import { normalizeProject } from '@/lib/project-utils'
 
 async function withLocale<T>(fn: (locale: Awaited<ReturnType<typeof getLocale>>) => T): Promise<T> {
   const locale = await getLocale()
@@ -103,19 +104,26 @@ export async function getAllProjects(): Promise<Project[]> {
   return withLocale(async (locale) => {
     const store = await getStore()
     const projects = store.projects.filter((p) => p.status !== 'inactive')
-    return localizeProjects(projects, locale)
+    return localizeProjects(projects, locale).map(normalizeProject)
   })
 }
 
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
-  return withLocale(async (locale) => {
-    const store = await getStore()
-    const project =
-      store.projects.find(
-        (p) => p.slug?.current === slug && p.status !== 'inactive',
-      ) ?? null
-    return project ? localizeProjects([project], locale)[0] : null
-  })
+  try {
+    return await withLocale(async (locale) => {
+      const store = await getStore()
+      const project =
+        store.projects.find(
+          (p) => p.slug?.current === slug && p.status !== 'inactive',
+        ) ?? null
+      return project
+        ? normalizeProject(localizeProjects([project], locale)[0])
+        : null
+    })
+  } catch (error) {
+    console.error('[content] getProjectBySlug failed:', slug, error)
+    return null
+  }
 }
 
 export async function getWhyStats(): Promise<WhyStat[]> {

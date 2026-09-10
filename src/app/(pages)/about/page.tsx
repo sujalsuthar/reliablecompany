@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 
 import CTABannerSection from '@/components/sections/CTABannerSection'
+import JsonLd from '@/components/seo/JsonLd'
 import CmsPageHero from '@/components/ui/CmsPageHero'
 import PortableTextContent from '@/components/ui/PortableTextContent'
 import {
@@ -15,6 +16,7 @@ import { getMessages } from '@/lib/i18n/messages'
 import { getLucideIcon } from '@/lib/icons'
 import { PROFILE_IMAGES } from '@/lib/profile-content'
 import { generateCmsPageMetadata } from '@/lib/seo'
+import { breadcrumbSchema } from '@/lib/structured-data'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
 export const revalidate = PUBLIC_REVALIDATE_SECONDS
@@ -36,16 +38,26 @@ export default async function AboutPage() {
   const missionHeadline = aboutPage?.title ?? m.aboutPage.heroTitle
   const featuredStat = whyStats[0]
 
+  const breadcrumbs = [
+    { label: m.common.home, href: '/' },
+    { label: m.common.about },
+  ]
+
   return (
     <>
+      <JsonLd
+        data={breadcrumbSchema(
+          breadcrumbs.map((item) => ({
+            name: item.label,
+            href: item.href,
+          })),
+        )}
+      />
       <CmsPageHero
         pageKey="about"
         title={m.aboutPage.heroTitle}
         description={m.aboutPage.heroDescription}
-        breadcrumbs={[
-          { label: m.common.home, href: '/' },
-          { label: m.common.about },
-        ]}
+        breadcrumbs={breadcrumbs}
       />
 
       <section className="section-pad bg-white">

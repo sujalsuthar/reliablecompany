@@ -14,7 +14,7 @@ import { getLocale } from '@/lib/i18n/locale'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 import GoogleAnalytics from '@/components/seo/GoogleAnalytics'
 import JsonLd from '@/components/seo/JsonLd'
-import { localBusinessSchema, organizationSchema, websiteSchema } from '@/lib/structured-data'
+import { organizationSchema, websiteSchema } from '@/lib/structured-data'
 import { BASE_URL, DEFAULT_DESCRIPTION } from '@/lib/seo'
 
 import '@/styles/globals.css'
@@ -114,7 +114,7 @@ export default async function RootLayout({
         }`}
         data-locale={locale}
       >
-        <JsonLd data={[organizationSchema(), websiteSchema(), localBusinessSchema()]} />
+        <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <GoogleAnalytics />
         <LocaleProvider locale={locale}>
           <NavOverlayProvider>

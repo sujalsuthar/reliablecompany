@@ -9,6 +9,7 @@ import { getBlogPostBySlug, getPublishedBlogPosts } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { formatDate, getMessages } from '@/lib/i18n/messages'
 import { articleSchema, breadcrumbSchema } from '@/lib/structured-data'
+import { sanitizeCmsText } from '@/lib/seo-sanitize'
 import { generateLocalizedMetadata } from '@/lib/seo'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
@@ -30,9 +31,12 @@ export async function generateMetadata({
   const post = await getBlogPostBySlug(params.slug)
   if (!post) return { title: 'Post Not Found' }
 
+  const cleanTitle = sanitizeCmsText(post.seoTitle ?? post.title)
+  const cleanTitleAr = post.seoTitleAr ? sanitizeCmsText(post.seoTitleAr) : undefined
+
   return generateLocalizedMetadata({
-    title: post.seoTitle ?? post.title,
-    titleAr: post.seoTitleAr,
+    title: cleanTitle,
+    titleAr: cleanTitleAr,
     titleAlt: post.seoTitleAlt,
     titleAltAr: post.seoTitleAltAr,
     description: post.seoDescription ?? post.excerpt ?? post.title,
@@ -65,10 +69,12 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
   const body =
     locale === 'ar' && post.contentAr?.trim() ? post.contentAr : post.content
 
+  const displayTitle = sanitizeCmsText(post.title)
+
   const breadcrumbs = [
     { label: m.common.home, href: '/' },
     { label: m.common.blog, href: '/blog' },
-    { label: post.title },
+    { label: displayTitle },
   ]
 
   return (
@@ -82,8 +88,8 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
             })),
           ),
           articleSchema({
-            title: post.title,
-            description: post.excerpt ?? post.title,
+            title: displayTitle,
+            description: post.excerpt ?? displayTitle,
             path: `/blog/${params.slug}`,
             datePublished: post.createdAt,
             dateModified: post.updatedAt,
@@ -93,7 +99,7 @@ export default async function BlogDetailPage({ params }: BlogDetailPageProps) {
       />
       <CmsPageHero
         pageKey="blog"
-        title={post.title}
+        title={displayTitle}
         description={post.excerpt}
         breadcrumbs={breadcrumbs}
       />

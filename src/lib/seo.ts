@@ -4,6 +4,7 @@ import type { PageSeoKey } from '@/lib/cms/page-seo'
 import type { Locale } from '@/lib/i18n/config'
 import { getLocale } from '@/lib/i18n/locale'
 import { getPageSeoEntry } from '@/lib/content'
+import { sanitizeCmsText } from '@/lib/seo-sanitize'
 import { getSiteUrl } from '@/lib/site-url'
 
 const BASE_URL = getSiteUrl()
@@ -67,18 +68,27 @@ export function generateMetadata(options: SEOOptions): Metadata {
   } = options
 
   const isAr = locale === 'ar'
-  const primaryTitle = (isAr ? titleAr : title)?.trim() ?? ''
-  const altTitle = (isAr ? titleAltAr : titleAlt)?.trim() ?? ''
+  const enTitle = sanitizeCmsText(title?.trim() ?? '')
+  const arTitle = sanitizeCmsText(titleAr?.trim() ?? '')
+  const enAltTitle = sanitizeCmsText(titleAlt?.trim() ?? '')
+  const arAltTitle = sanitizeCmsText(titleAltAr?.trim() ?? '')
+
+  const primaryTitle = (isAr ? arTitle : enTitle) || (isAr ? enTitle : arTitle)
+  const altTitle = (isAr ? arAltTitle : enAltTitle) || (isAr ? enAltTitle : arAltTitle)
+
   const primaryDescription = (isAr ? descriptionAr : description)?.trim() ?? ''
   const altDescription = (isAr ? descriptionAltAr : descriptionAlt)?.trim() ?? ''
 
-  const resolvedTitle = truncateAtWord(primaryTitle || altTitle, META_TITLE_MAX)
+  const resolvedTitle = truncateAtWord(
+    primaryTitle || altTitle || (isAr ? 'شركة ريلايبل' : 'Reliable Company'),
+    META_TITLE_MAX,
+  )
   const resolvedDescription = truncateAtWord(
     primaryDescription || altDescription || (isAr ? DEFAULT_DESCRIPTION_AR : DEFAULT_DESCRIPTION),
     META_DESCRIPTION_MAX,
   )
   const resolvedKeywords = (isAr && keywordsAr?.trim() ? keywordsAr : keywords)?.trim()
-  const resolvedOgTitle = truncateAtWord(altTitle || primaryTitle, META_TITLE_MAX)
+  const resolvedOgTitle = truncateAtWord(altTitle || primaryTitle || resolvedTitle, META_TITLE_MAX)
   const resolvedOgDescription = truncateAtWord(
     altDescription || primaryDescription || resolvedDescription,
     META_DESCRIPTION_MAX,
@@ -86,7 +96,10 @@ export function generateMetadata(options: SEOOptions): Metadata {
   const siteName = isAr ? SITE_NAME_AR : SITE_NAME
 
   const canonicalPath = path.startsWith('/') ? path : `/${path}`
-  const canonicalUrl = `${BASE_URL}${canonicalPath === '/' ? '' : canonicalPath}`
+  const canonicalUrl =
+    canonicalPath === '/'
+      ? `${BASE_URL}/`
+      : `${BASE_URL}${canonicalPath}`
   const ogImage = image ?? DEFAULT_OG_IMAGE
   const openGraphTitle = absoluteTitle ? resolvedOgTitle : `${resolvedOgTitle} | ${siteName}`
 

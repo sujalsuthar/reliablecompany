@@ -8,10 +8,11 @@ export const ENGINEERING_SITE_URL = 'https://engineering.reliablecompany.sa'
 export const NCA_BADGE_PATH = '/nca-badge.png'
 export const COMPANY_FACEBOOK_URL =
   'https://www.facebook.com/profile.php?id=61591194992498&sk=about'
+export const COMPANY_LINKEDIN_URL = 'https://www.linkedin.com/company/reliablecompany'
 export const COMPANY_ADDRESS =
-  'B64B, Prince Muteb Street, Al Aziziyah District, Jeddah, Saudi Arabia'
+  '8648, Prince Muteb Street, Al Aziziyah District, Jeddah, Saudi Arabia. P.O. Box: 23342'
 export const COMPANY_ADDRESS_AR =
-  'B64B، شارع الأمير متعب، حي العزيزية، جدة، المملكة العربية السعودية'
+  '8648، شارع الأمير متعب، حي العزيزية، جدة، المملكة العربية السعودية. ص.ب: 23342'
 export const DIVISION_TAGLINE = 'A division of Reliable Company'
 export const DIVISION_TAGLINE_AR = 'قسم من شركة ريلايبل'
 export const CERTIFICATIONS_FOOTER_IMAGE = '/certifications-footer.png'

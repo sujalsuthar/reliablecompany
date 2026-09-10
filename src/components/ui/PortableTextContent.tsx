@@ -53,5 +53,14 @@ interface PortableTextContentProps {
 }
 
 export default function PortableTextContent({ value }: PortableTextContentProps) {
-  return <PortableText value={value} components={components} />
+  const safeValue = value.filter(
+    (block) =>
+      block?._type === 'block' &&
+      Array.isArray(block.children) &&
+      block.children.some((child) => 'text' in child && String(child.text ?? '').trim()),
+  )
+
+  if (!safeValue.length) return null
+
+  return <PortableText value={safeValue} components={components} />
 }

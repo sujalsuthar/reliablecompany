@@ -42,7 +42,7 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://static.cloudflareinsights.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https:",
       "font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com",
@@ -145,6 +145,11 @@ const nextConfig = {
         destination: '/projects',
         permanent: true,
       },
+      {
+        source: '/ransomware-recovery',
+        destination: '/services/ransomware-incident-response',
+        permanent: true,
+      },
     ]
   },
   async headers() {
@@ -167,7 +172,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=2592000, stale-while-revalidate=86400',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

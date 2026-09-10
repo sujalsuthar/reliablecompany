@@ -10,7 +10,7 @@ import { getServiceBySlug, getServices } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { getMessages } from '@/lib/i18n/messages'
 import { resolveServiceImages } from '@/lib/service-images'
-import { breadcrumbSchema, serviceSchema } from '@/lib/structured-data'
+import { breadcrumbSchema, faqPageSchema, serviceSchema } from '@/lib/structured-data'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 import { generateLocalizedMetadata } from '@/lib/seo'
 
@@ -40,19 +40,26 @@ export async function generateMetadata({
     return { title: 'Service Not Found' }
   }
 
+  const slug = params.slug
+  const defaultTitle = `${service.title} in Saudi Arabia | VAPT & Cybersecurity`
+  const defaultTitleAr = `${service.title} في السعودية | تقييم الثغرات والأمن السيبراني`
+  const defaultDescription =
+    service.shortDescription ??
+    `Professional ${service.title} services in Saudi Arabia. NCA-compliant assessments by ISO 27001 certified experts.`
+
   return generateLocalizedMetadata({
-    title: service.seoTitle ?? service.title,
-    titleAr: service.seoTitleAr,
-    titleAlt: service.seoTitleAlt,
+    title: service.seoTitle ?? defaultTitle,
+    titleAr: service.seoTitleAr ?? defaultTitleAr,
+    titleAlt: service.seoTitleAlt ?? service.title,
     titleAltAr: service.seoTitleAltAr,
-    description: service.seoDescription ?? service.shortDescription,
+    description: service.seoDescription ?? defaultDescription,
     descriptionAr: service.seoDescriptionAr,
     descriptionAlt: service.seoDescriptionAlt,
     descriptionAltAr: service.seoDescriptionAltAr,
     keywords: service.seoKeywords,
     keywordsAr: service.seoKeywordsAr,
-    path: `/services/${params.slug}`,
-    absoluteTitle: Boolean(service.seoTitle?.trim()),
+    path: `/services/${slug}`,
+    absoluteTitle: true,
   })
 }
 
@@ -79,27 +86,34 @@ export default async function ServiceDetailPage({
   const breadcrumbs = [
     { label: m.common.home, href: '/' },
     { label: m.common.services, href: '/services' },
-    ...(categoryLabel ? [{ label: categoryLabel, href: '/services' }] : []),
     { label: service.title },
+  ]
+
+  const faqs = (service.faqs ?? []).map((faq) => ({
+    question: locale === 'ar' && faq.questionAr ? faq.questionAr : faq.question,
+    answer: locale === 'ar' && faq.answerAr ? faq.answerAr : faq.answer,
+  }))
+
+  const faqSchema = faqPageSchema(faqs)
+  const jsonLd = [
+    breadcrumbSchema(
+      breadcrumbs.map((item) => ({
+        name: item.label,
+        href: item.href,
+      })),
+    ),
+    serviceSchema({
+      name: service.title,
+      description: service.shortDescription ?? service.title,
+      path: `/services/${params.slug}`,
+      serviceType: categoryLabel ?? service.category,
+    }),
+    ...(faqSchema ? [faqSchema] : []),
   ]
 
   return (
     <>
-      <JsonLd
-        data={[
-          breadcrumbSchema(
-            breadcrumbs.map((item) => ({
-              name: item.label,
-              href: item.href,
-            })),
-          ),
-          serviceSchema({
-            name: service.title,
-            description: service.shortDescription ?? service.title,
-            path: `/services/${params.slug}`,
-          }),
-        ]}
-      />
+      <JsonLd data={jsonLd} />
       <PageHero
         title={service.title}
         description={service.shortDescription}

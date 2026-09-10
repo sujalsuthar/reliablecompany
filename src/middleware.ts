@@ -19,6 +19,7 @@ function setLocaleCookies(response: NextResponse, locale: string, manual: boolea
     maxAge: COOKIE_MAX_AGE,
     sameSite: 'lax' as const,
     secure: isProduction && !forceInsecure,
+    httpOnly: true,
   }
 
   response.cookies.set(LOCALE_COOKIE, locale, base)
@@ -34,8 +35,10 @@ export async function middleware(request: NextRequest) {
   // --- Protect admin API routes (defense in depth) ---
   const isAdminLoginApi =
     pathname === '/api/admin/login' && request.method === 'POST'
+  const isPublicCmsFile =
+    pathname.startsWith('/api/cms/files/') && request.method === 'GET'
   const isProtectedApi =
-    pathname.startsWith('/api/cms') ||
+    (pathname.startsWith('/api/cms') && !isPublicCmsFile) ||
     (pathname.startsWith('/api/admin') && !isAdminLoginApi)
 
   if (isProtectedApi && !(await verifySessionToken(token))) {

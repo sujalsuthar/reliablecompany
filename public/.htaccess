@@ -2,6 +2,13 @@
 # cPanel "Setup Node.js App" usually configures this automatically.
 # Use this file only if your host requires manual proxy rules.
 
+<IfModule mod_headers.c>
+  # Remove malformed Apache header directives that leak as literal response headers
+  Header always unset edit
+  Header always unset setifempty
+  Header always unset X-Powered-By
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

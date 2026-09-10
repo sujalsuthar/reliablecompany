@@ -214,8 +214,8 @@ export function formValuesToItem(collection: CmsCollection, values: Record<strin
       seoKeywords: values.seoKeywords,
       seoKeywordsAr: values.seoKeywordsAr,
       division: {
-        name: values.divisionName,
-        type: values.divisionType,
+        name: String(values.divisionName ?? '').trim(),
+        type: String(values.divisionType ?? 'it').trim().toLowerCase() || 'it',
       },
       tags,
       completedYear: values.completedYear ? Number(values.completedYear) : undefined,

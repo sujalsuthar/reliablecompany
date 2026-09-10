@@ -15,7 +15,7 @@ export function publicCookieOptions(maxAgeSec: number) {
   // otherwise Secure cookies may be dropped and language switch appears broken.
   const forceInsecure = process.env.COOKIE_SECURE === '0'
   return {
-    httpOnly: false,
+    httpOnly: true,
     secure: isProduction && !forceInsecure,
     sameSite: 'lax' as const,
     path: '/',

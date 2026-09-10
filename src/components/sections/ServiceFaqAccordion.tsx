@@ -41,9 +41,15 @@ export default function ServiceFaqAccordion({ items, className }: ServiceFaqAcco
                 aria-hidden
               />
             </button>
-            {isOpen && (
-              <div className="px-5 pb-4 text-sm leading-relaxed text-gray-600">{item.answer}</div>
-            )}
+            {/* Always render answers in HTML for crawlers; hide collapsed with CSS */}
+            <div
+              className={clsx(
+                'px-5 pb-4 text-sm leading-relaxed text-gray-600',
+                !isOpen && 'hidden',
+              )}
+            >
+              {item.answer}
+            </div>
           </div>
         )
       })}

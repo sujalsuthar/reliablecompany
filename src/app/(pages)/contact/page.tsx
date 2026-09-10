@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import JsonLd from '@/components/seo/JsonLd'
 import BusinessHours from '@/components/ui/BusinessHours'
 import ContactForm from '@/components/ui/ContactForm'
 import ContactDetails from '@/components/ui/ContactDetails'
@@ -10,6 +11,7 @@ import { getFooterContent, getGlobalContent } from '@/lib/content'
 import { getLocale } from '@/lib/i18n/locale'
 import { getMessages } from '@/lib/i18n/messages'
 import { generateCmsPageMetadata } from '@/lib/seo'
+import { breadcrumbSchema } from '@/lib/structured-data'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 
 export const revalidate = PUBLIC_REVALIDATE_SECONDS
@@ -29,16 +31,26 @@ export default async function ContactPage() {
   const email = globalContent.email || COMPANY_EMAIL
   const phone = globalContent.phone || COMPANY_PHONE
 
+  const breadcrumbs = [
+    { label: m.home, href: '/' },
+    { label: m.title },
+  ]
+
   return (
     <>
+      <JsonLd
+        data={breadcrumbSchema(
+          breadcrumbs.map((item) => ({
+            name: item.label,
+            href: item.href,
+          })),
+        )}
+      />
       <CmsPageHero
         pageKey="contact"
         title={m.title}
         description={m.description}
-        breadcrumbs={[
-          { label: m.home, href: '/' },
-          { label: m.title },
-        ]}
+        breadcrumbs={breadcrumbs}
       />
 
       <section className="section-pad bg-white">
