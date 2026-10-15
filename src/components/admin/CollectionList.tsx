@@ -1,6 +1,6 @@
 'use client'
 
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Pencil, Plus, RefreshCw, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
@@ -32,6 +32,27 @@ function getCellValue(item: Record<string, unknown>, key: string): string {
   return String(value)
 }
 
+async function parseApiError(res: Response): Promise<string> {
+  try {
+    const body = (await res.json()) as { message?: string; error?: string }
+    if (body.message) return body.message
+    if (body.error === 'Unauthorized') {
+      return 'Session expired. Please log out and sign in again.'
+    }
+  } catch {
+    // ignore
+  }
+
+  if (res.status === 401) {
+    return 'Session expired. Please log out and sign in again.'
+  }
+  if (res.status === 503) {
+    return 'Database is temporarily unavailable. Check MongoDB Atlas (cluster not paused, Network Access allows your server).'
+  }
+
+  return `Could not load items (HTTP ${res.status}).`
+}
+
 export default function CollectionList({ config, pathKey }: CollectionListProps) {
   const router = useRouter()
   const [items, setItems] = useState<Record<string, unknown>[]>([])
@@ -44,12 +65,18 @@ export default function CollectionList({ config, pathKey }: CollectionListProps)
     setIsLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/cms/${collectionApiPath}`)
-      if (!res.ok) throw new Error('Failed to load')
-      const data = (await res.json()) as { items: Record<string, unknown>[] }
-      setItems(data.items)
-    } catch {
-      setError('Could not load items.')
+      const res = await fetch(`/api/cms/${collectionApiPath}`, {
+        credentials: 'include',
+        cache: 'no-store',
+      })
+      if (!res.ok) {
+        throw new Error(await parseApiError(res))
+      }
+      const data = (await res.json()) as { items?: Record<string, unknown>[] }
+      setItems(Array.isArray(data.items) ? data.items : [])
+    } catch (err) {
+      setItems([])
+      setError(err instanceof Error ? err.message : 'Could not load items.')
     } finally {
       setIsLoading(false)
     }
@@ -64,6 +91,7 @@ export default function CollectionList({ config, pathKey }: CollectionListProps)
 
     const res = await fetch(`/api/cms/${collectionApiPath}/${id}`, {
       method: 'DELETE',
+      credentials: 'include',
     })
 
     if (res.ok) {
@@ -89,7 +117,19 @@ export default function CollectionList({ config, pathKey }: CollectionListProps)
         }
       />
 
-      {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => loadItems()}
+            className="mt-2 inline-flex items-center gap-1.5 font-medium text-red-900 underline-offset-2 hover:underline"
+          >
+            <RefreshCw className="h-3.5 w-3.5" aria-hidden />
+            Retry
+          </button>
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <table className="min-w-full divide-y divide-gray-200">
@@ -115,10 +155,16 @@ export default function CollectionList({ config, pathKey }: CollectionListProps)
                   Loading...
                 </td>
               </tr>
-            ) : items.length === 0 ? (
+            ) : items.length === 0 && !error ? (
               <tr>
                 <td colSpan={config.listColumns.length + 1} className="px-5 py-10 text-center text-sm text-gray-500">
                   No items yet.
+                </td>
+              </tr>
+            ) : items.length === 0 ? (
+              <tr>
+                <td colSpan={config.listColumns.length + 1} className="px-5 py-10 text-center text-sm text-gray-500">
+                  —
                 </td>
               </tr>
             ) : (

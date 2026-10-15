@@ -1,15 +1,17 @@
 import { NextResponse } from 'next/server'
 
 import { requireAdminSession } from '@/lib/cms/api-auth'
+import { cmsDatabaseErrorResponse } from '@/lib/cms/api-response'
 import { getStore } from '@/lib/cms/store'
 
 export async function GET() {
   const authError = await requireAdminSession()
   if (authError) return authError
 
-  const store = await getStore()
+  try {
+    const store = await getStore()
 
-  return NextResponse.json({
+    return NextResponse.json({
     blogPosts: store.blogPosts.length,
     activeCareers: store.careers.filter((c) => c.status === 'active').length,
     newEnquiries: store.enquiries.filter((e) => e.status === 'new').length,
@@ -28,8 +30,11 @@ export async function GET() {
     recentCareerApplications: [...store.careerApplications]
       .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt))
       .slice(0, 5),
-    recentBlogPosts: [...store.blogPosts]
+    recentBlogPosts: [...(store.blogPosts ?? [])]
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))
       .slice(0, 5),
   })
+  } catch (error) {
+    return cmsDatabaseErrorResponse(error)
+  }
 }

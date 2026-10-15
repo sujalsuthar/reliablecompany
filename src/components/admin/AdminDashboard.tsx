@@ -47,9 +47,9 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null)
 
   useEffect(() => {
-    fetch('/api/cms/stats')
-      .then((res) => res.json())
-      .then((data) => setStats(data as DashboardStats))
+    fetch('/api/cms/stats', { credentials: 'include', cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setStats(data as DashboardStats | null))
       .catch(() => setStats(null))
   }, [])
 

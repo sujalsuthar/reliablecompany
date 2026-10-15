@@ -1,5 +1,6 @@
 const COOKIE_NAME = 'admin_session'
-const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000
+/** Admin stays signed in for 7 days (reduces surprise logouts on shared hosting). */
+const SESSION_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 const MIN_SESSION_SECRET_LENGTH = 32
 
 export { COOKIE_NAME, SESSION_MAX_AGE_MS }

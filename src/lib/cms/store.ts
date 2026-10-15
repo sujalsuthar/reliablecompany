@@ -189,6 +189,28 @@ function migrateStore(store: CmsStore): CmsStore {
   if (!Array.isArray(store.campaignApplications)) {
     migrated.campaignApplications = []
   }
+
+  const collectionArrays: (keyof CmsStore)[] = [
+    'services',
+    'projects',
+    'blogPosts',
+    'careers',
+    'industries',
+    'divisions',
+    'team',
+    'certifications',
+    'values',
+    'whyStats',
+  ]
+  for (const key of collectionArrays) {
+    const value = migrated[key]
+    if (!Array.isArray(value)) {
+      const fallback = initial[key]
+      Object.assign(migrated, {
+        [key]: Array.isArray(fallback) ? fallback : [],
+      })
+    }
+  }
   if (!Array.isArray(store.campaigns) || store.campaigns.length === 0) {
     migrated.campaigns = initial.campaigns
   } else {
@@ -254,7 +276,13 @@ export async function getStore(): Promise<CmsStore> {
   const cached = getCachedStore()
   if (cached) return cached
 
-  const raw = await readRawStore()
+  let raw: CmsStore | null
+  try {
+    raw = await readRawStore()
+  } catch (error) {
+    clearCachedStore()
+    throw error
+  }
   if (!raw) {
     const allowSeed = process.env.ALLOW_CMS_SEED === '1'
     if (!allowSeed) {
@@ -348,7 +376,8 @@ export async function listCollection<K extends CmsCollection>(
   collection: K,
 ): Promise<CollectionItemMap[K][]> {
   const store = await getStore()
-  return store[collection] as CollectionItemMap[K][]
+  const items = store[collection]
+  return Array.isArray(items) ? (items as CollectionItemMap[K][]) : []
 }
 
 export async function getCollectionItem<K extends CmsCollection>(

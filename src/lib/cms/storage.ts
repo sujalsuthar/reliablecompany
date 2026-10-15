@@ -2,7 +2,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 
 import type { CmsStore } from '@/lib/cms/types'
-import { getDb, getMongoDbName, isMongoEnabled } from '@/lib/cms/mongodb'
+import { getDb, getMongoDbName, isMongoEnabled, resetMongoClient } from '@/lib/cms/mongodb'
 
 const STORE_PATH = path.join(process.cwd(), 'data', 'cms-store.json')
 export const STORE_DOC_ID = 'main' as const
@@ -41,11 +41,24 @@ async function readStoreDocumentFromMongo(): Promise<{
   data: CmsStore | null
   updatedAt?: Date
 }> {
-  const db = await getDb()
-  const doc = await db
-    .collection<CmsStoreDocument>('cms_store')
-    .findOne({ _id: STORE_DOC_ID })
-  return { data: doc?.data ?? null, updatedAt: doc?.updatedAt }
+  const readOnce = async () => {
+    const db = await getDb()
+    const doc = await db
+      .collection<CmsStoreDocument>('cms_store')
+      .findOne({ _id: STORE_DOC_ID })
+    return { data: doc?.data ?? null, updatedAt: doc?.updatedAt }
+  }
+
+  try {
+    return await readOnce()
+  } catch (firstError) {
+    resetMongoClient()
+    try {
+      return await readOnce()
+    } catch {
+      throw firstError
+    }
+  }
 }
 
 async function writeStoreToMongo(store: CmsStore): Promise<void> {
