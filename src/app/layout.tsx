@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import dynamic from 'next/dynamic'
 import { Cairo, Inter, Tajawal } from 'next/font/google'
+import { Suspense } from 'react'
 
 import CookieBanner from '@/components/layout/CookieBanner'
 import WhatsAppButton from '@/components/ui/WhatsAppButton'
@@ -13,6 +14,7 @@ import { isRtl } from '@/lib/i18n/config'
 import { getLocale } from '@/lib/i18n/locale'
 import { PUBLIC_REVALIDATE_SECONDS } from '@/lib/public-revalidate'
 import GoogleAnalytics from '@/components/seo/GoogleAnalytics'
+import GoogleAnalyticsPageView from '@/components/seo/GoogleAnalyticsPageView'
 import JsonLd from '@/components/seo/JsonLd'
 import { organizationSchema, websiteSchema } from '@/lib/structured-data'
 import { BASE_URL, DEFAULT_DESCRIPTION } from '@/lib/seo'
@@ -116,6 +118,9 @@ export default async function RootLayout({
       >
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <GoogleAnalytics />
+        <Suspense fallback={null}>
+          <GoogleAnalyticsPageView />
+        </Suspense>
         <LocaleProvider locale={locale}>
           <NavOverlayProvider>
             <Navbar />
